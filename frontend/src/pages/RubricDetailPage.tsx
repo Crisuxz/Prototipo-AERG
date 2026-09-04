@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
+import { ArrowLeftIcon, PlusIcon } from '../components/icons'
 import { Loader } from '../components/Loader'
 import { RubricCriterionEditor } from '../components/RubricCriterionEditor'
 import { StatusBadge } from '../components/StatusBadge'
@@ -55,6 +56,7 @@ export function RubricDetailPage() {
   const [version, setVersion] = useState(1)
   const [loading, setLoading] = useState(!isNew)
   const [saving, setSaving] = useState(false)
+  const [tab, setTab] = useState<'criterios' | 'info'>('criterios')
 
   useEffect(() => {
     if (rubricId === null) return
@@ -94,6 +96,8 @@ export function RubricDetailPage() {
     })
   }
 
+  const cancel = () => navigate('/rubricas')
+
   const save = async () => {
     setSaving(true)
     try {
@@ -130,96 +134,161 @@ export function RubricDetailPage() {
   if (loading) return <Loader label="Cargando rubrica..." />
 
   return (
-    <div className="max-w-4xl">
-      <header className="flex flex-wrap items-center justify-between gap-2">
+    <div className="max-w-5xl">
+      <button
+        type="button"
+        onClick={cancel}
+        className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700"
+      >
+        <ArrowLeftIcon className="h-4 w-4" />
+        Volver al listado
+      </button>
+
+      <header className="mt-3 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-xl font-semibold">{isNew ? 'Nueva rubrica' : form.name}</h2>
+          <input
+            value={form.name}
+            disabled={readOnly}
+            placeholder={isNew ? 'Nueva rubrica' : 'Nombre de la rubrica'}
+            onChange={(event) => setForm({ ...form, name: event.target.value })}
+            className="rounded-lg border border-transparent px-1 -mx-1 text-2xl font-semibold text-gray-900 hover:border-gray-200 focus:border-indigo-400 focus:outline-none"
+          />
           {!isNew && (
             <p className="mt-1 flex items-center gap-2 text-sm text-gray-500">
               <StatusBadge status={status} /> version {version}
             </p>
           )}
+          <input
+            value={form.description ?? ''}
+            disabled={readOnly}
+            placeholder="Descripcion breve de la rubrica"
+            onChange={(event) => setForm({ ...form, description: event.target.value || null })}
+            className="mt-1 w-full max-w-lg rounded-lg border border-transparent px-1 -mx-1 text-sm text-gray-500 hover:border-gray-200 focus:border-indigo-400 focus:outline-none"
+          />
         </div>
+        <button
+          type="button"
+          disabled={readOnly}
+          onClick={() =>
+            setForm({ ...form, criteria: [...form.criteria, emptyCriterion(form.criteria.length + 1)] })
+          }
+          className="flex items-center gap-1.5 rounded-lg border border-gray-300 px-3.5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40"
+        >
+          <PlusIcon className="h-4 w-4" />
+          Agregar criterio
+        </button>
+      </header>
+
+      <div className="mt-6 flex gap-6 border-b border-gray-200 text-sm font-medium">
+        <button
+          type="button"
+          onClick={() => setTab('criterios')}
+          className={`border-b-2 pb-2.5 ${
+            tab === 'criterios' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500'
+          }`}
+        >
+          Criterios
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab('info')}
+          className={`border-b-2 pb-2.5 ${
+            tab === 'info' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500'
+          }`}
+        >
+          Informacion general
+        </button>
+      </div>
+
+      {tab === 'criterios' ? (
+        <>
+          <div className="mt-4 overflow-x-auto rounded-xl border border-gray-200 bg-white">
+            <table className="w-full min-w-[720px] border-collapse text-sm">
+              <thead className="text-left text-xs font-medium uppercase tracking-wide text-gray-400">
+                <tr>
+                  <th className="px-4 py-3">Criterio</th>
+                  <th className="px-4 py-3">Niveles de desempenio</th>
+                  <th className="px-4 py-3">Peso (%)</th>
+                  <th className="px-4 py-3" />
+                </tr>
+              </thead>
+              <tbody>
+                {form.criteria.map((criterion, index) => (
+                  <RubricCriterionEditor
+                    key={index}
+                    criterion={criterion}
+                    disabled={readOnly}
+                    onChange={(updated) => updateCriterion(index, updated)}
+                    onRemove={() => removeCriterion(index)}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className={`mt-2 text-sm ${totalWeight === 100 ? 'text-emerald-600' : 'text-amber-600'}`}>
+            Suma de pesos: {totalWeight}% {totalWeight === 100 ? '' : '(debe ser 100 para publicar)'}
+          </p>
+        </>
+      ) : (
+        <div className="mt-4 space-y-4 rounded-xl border border-gray-200 bg-white p-5">
+          <label className="block text-sm">
+            <span className="font-medium text-gray-700">Nombre</span>
+            <input
+              value={form.name}
+              disabled={readOnly}
+              onChange={(event) => setForm({ ...form, name: event.target.value })}
+              className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none"
+            />
+          </label>
+          <label className="block text-sm">
+            <span className="font-medium text-gray-700">Descripcion</span>
+            <input
+              value={form.description ?? ''}
+              disabled={readOnly}
+              onChange={(event) => setForm({ ...form, description: event.target.value || null })}
+              className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none"
+            />
+          </label>
+          <label className="block text-sm">
+            <span className="font-medium text-gray-700">Instrucciones para la IA (opcional)</span>
+            <textarea
+              value={form.instructions ?? ''}
+              disabled={readOnly}
+              rows={4}
+              onChange={(event) => setForm({ ...form, instructions: event.target.value || null })}
+              className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none"
+            />
+          </label>
+        </div>
+      )}
+
+      <div className="mt-6 flex items-center justify-between">
+        <button
+          type="button"
+          onClick={cancel}
+          className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        >
+          Cancelar
+        </button>
         <div className="flex gap-2">
-          <button
-            type="button"
-            disabled={saving || readOnly}
-            onClick={save}
-            className="rounded border border-gray-300 px-3 py-1.5 text-sm disabled:opacity-50"
-          >
-            Guardar
-          </button>
           <button
             type="button"
             disabled={saving || readOnly || isNew || status === 'PUBLISHED'}
             onClick={publish}
-            className="rounded bg-purple-700 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
           >
             Publicar
           </button>
+          <button
+            type="button"
+            disabled={saving || readOnly}
+            onClick={save}
+            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+          >
+            Guardar cambios
+          </button>
         </div>
-      </header>
-
-      <div className="mt-4 space-y-3 rounded border border-gray-200 bg-white p-4">
-        <label className="block text-sm">
-          <span className="text-gray-600">Nombre</span>
-          <input
-            value={form.name}
-            disabled={readOnly}
-            onChange={(event) => setForm({ ...form, name: event.target.value })}
-            className="mt-1 w-full rounded border border-gray-300 px-2 py-1 text-sm"
-          />
-        </label>
-        <label className="block text-sm">
-          <span className="text-gray-600">Descripcion</span>
-          <input
-            value={form.description ?? ''}
-            disabled={readOnly}
-            onChange={(event) => setForm({ ...form, description: event.target.value || null })}
-            className="mt-1 w-full rounded border border-gray-300 px-2 py-1 text-sm"
-          />
-        </label>
-        <label className="block text-sm">
-          <span className="text-gray-600">Instrucciones para la IA (opcional)</span>
-          <textarea
-            value={form.instructions ?? ''}
-            disabled={readOnly}
-            rows={3}
-            onChange={(event) => setForm({ ...form, instructions: event.target.value || null })}
-            className="mt-1 w-full rounded border border-gray-300 px-2 py-1 text-sm"
-          />
-        </label>
       </div>
-
-      <div className="mt-6 flex items-center justify-between">
-        <h3 className="font-semibold">Criterios</h3>
-        <p className={totalWeight === 100 ? 'text-sm text-green-700' : 'text-sm text-amber-700'}>
-          Suma de pesos: {totalWeight}% {totalWeight === 100 ? '' : '(debe ser 100 para publicar)'}
-        </p>
-      </div>
-
-      <div className="mt-3 space-y-3">
-        {form.criteria.map((criterion, index) => (
-          <RubricCriterionEditor
-            key={index}
-            criterion={criterion}
-            disabled={readOnly}
-            onChange={(updated) => updateCriterion(index, updated)}
-            onRemove={() => removeCriterion(index)}
-          />
-        ))}
-      </div>
-
-      <button
-        type="button"
-        disabled={readOnly}
-        onClick={() =>
-          setForm({ ...form, criteria: [...form.criteria, emptyCriterion(form.criteria.length + 1)] })
-        }
-        className="mt-3 text-sm font-medium text-purple-700 disabled:opacity-40"
-      >
-        + Agregar criterio
-      </button>
     </div>
   )
 }

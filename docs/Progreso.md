@@ -155,3 +155,44 @@ Se creó y publicó una rúbrica "Trabajo de investigación" (id=3) con 4 criter
 ### Estado de git
 
 Esta sesión, junto con la anterior (Iteraciones 1–9), se commitea en este punto. `backend/.env` y `backend/app.db` permanecen fuera de git (confirmado con `git check-ignore -v`); la clave real de Gemini nunca se versiona.
+
+---
+
+## Sesión — Rediseño visual del frontend a partir de las maquetas
+
+Fecha: 2026-09-04
+
+Estado al iniciar: backend y frontend funcionales y conectados a la API real (sesión anterior), pero con una interfaz mínima sin trabajo visual (colores/tipografía por defecto de Tailwind, sin iconos). El usuario compartió las 6 maquetas oficiales del plan (Dashboard, Evaluar trabajo, Revisión de evaluación, Rúbricas — listado y detalle, Historial) con paleta de colores, tipografía (Inter) y layout explícitos, y pidió que el diseño quedara igual a esas maquetas.
+
+### Sistema de diseño
+
+- **Tipografía:** se añadió Google Fonts Inter en `frontend/index.html` y se sobreescribió `--font-sans` en `frontend/src/index.css` (Tailwind v4, bloque `@theme`).
+- **Paleta:** los hex de las maquetas coinciden exactamente con la paleta por defecto de Tailwind (`indigo-600` = `#4F46E5`, `emerald-500` = `#10B981`, `amber-500` = `#F59E0B`, `violet-500` = `#8B5CF6`, `gray-100` = `#F3F4F6`, `gray-900` = `#111827`), así que no hizo falta extender el tema: se usaron directamente esas clases.
+- **Iconos:** no había ninguna librería de iconos instalada; se creó `frontend/src/components/icons.tsx` con ~20 iconos SVG de trazo (estilo outline) hechos a mano en vez de añadir una dependencia nueva.
+
+### Componentes y páginas reescritos
+
+- `layouts/AppLayout.tsx` — sidebar oscura (`gray-900`) con logo, navegación con iconos y estado activo en `indigo-600`, botón de cerrar sesión. Se agregó `pages/ProfilePage.tsx` (placeholder, sin maqueta provista) y su ruta `/perfil` porque el nav de las maquetas lo referencia.
+- `pages/DashboardPage.tsx` — bienvenida, 3 tarjetas de acceso rápido a color, resumen general con 4 métricas reales (evaluaciones, trabajos, rúbricas, evaluaciones del mes) y tabla de evaluaciones recientes.
+- `pages/EvaluateWorkPage.tsx` — flujo por pasos numerados (1 trabajo, 2 rúbrica con botón "Ver rúbrica", 3 instrucciones opcionales).
+- `pages/ReviewEvaluationPage.tsx` — tarjetas de calificación total/observaciones + tabla "Detalle por criterio" (Criterio/Nivel/Puntos/Retroalimentación) y barra inferior fija (Cancelar / aviso / Guardar / Aprobar y enviar).
+- `pages/RubricsPage.tsx` y `RubricDetailPage.tsx` — listado en tabla con iconos ver/editar/eliminar y paginación numerada; detalle con pestañas "Criterios"/"Información general" y editor de criterios en tabla (los niveles de desempeño se mantienen dinámicos en vez de fijarse a 4 columnas, porque el modelo de datos permite cualquier número de niveles por criterio).
+- `pages/HistoryPage.tsx` — buscador, filtro de periodo (7/30/90 días o todo, usando el parámetro `from` que ya soportaba `evaluationsApi`) y tabla con pastilla de nivel de desempeño coloreada.
+- Componentes compartidos restilizados: `StatusBadge`, `Pagination` (ahora con números de página en vez de solo Anterior/Siguiente), `EmptyState`, `Loader`, `Modal`, `ConfirmDialog`, `ToastNotifications`, `FileUploader`, `HistoryTable`, `EvaluationSummaryCard`, `CriterionReviewCard`, `RubricCriterionEditor`, `PerformanceLevelEditor`, `ScoreEditor`. Se añadió `components/ScoreLevel.tsx` (pastilla Excelente/Muy bueno/Bueno/Satisfactorio/Insuficiente según el porcentaje del puntaje).
+
+### Decisiones y desviaciones conscientes frente a las maquetas
+
+1. Los filtros de estado de rúbrica/evaluación que existían antes (DRAFT/PUBLISHED/ARCHIVED, estado de evaluación) se quitaron de Rúbricas e Historial porque las maquetas solo muestran buscador y filtro de periodo; si se necesitan de vuelta, es un cambio menor.
+2. La "Calificación total" de Revisión de evaluación se dejó de solo lectura: el backend la recalcula a partir de los puntajes por criterio (`EvaluationReviewInput` no acepta un total independiente), así que no se implementó como campo editable aunque la maqueta muestra un lápiz.
+3. La tabla de niveles de desempeño en el detalle de rúbrica no usa columnas fijas "Excelente/Bueno/Satisfactorio/Insuficiente" como en la maqueta; se renderiza como una lista de niveles dinámica por criterio para no romper rúbricas con un número distinto de niveles.
+4. `frontend/src/components/icons.tsx` es un set de iconos propio (no una librería externa) para no añadir una dependencia solo por esto.
+
+### Verificación realizada
+
+- `npx tsc -b` sin errores; `npx oxlint` sin errores nuevos (solo warnings preexistentes de `react-refresh`/`set-state-in-effect`).
+- Backend y frontend levantados juntos (`.claude/launch.json` nuevo, define el servidor `frontend-dev`) y las 6 pantallas revisadas visualmente en el navegador contra las maquetas, con datos reales de la base de datos de desarrollo: Dashboard, Evaluar trabajo, Rúbricas (listado y detalle con pestañas), Historial e Revisión de evaluación (incluida la barra de acciones inferior en una ventana más alta).
+- Ambos procesos se detuvieron al finalizar la sesión (`preview_stop` del frontend, `taskkill` del proceso `uvicorn` en el puerto 8000); no quedaron servidores corriendo.
+
+### Estado de git
+
+Esta sesión se commitea en este punto. Los archivos de tooling `.claude/.headroom_wrap_owners.json`, `.claude/.headroom_wrap_marker.json` (borrado) y `.claude/settings.local.json` que aparecían modificados/borrados al iniciar la sesión son ajenos a este trabajo y se dejaron fuera del commit.

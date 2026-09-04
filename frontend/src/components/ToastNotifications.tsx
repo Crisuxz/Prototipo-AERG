@@ -34,9 +34,9 @@ const ERROR_MESSAGES: Record<string, string> = {
 }
 
 const STYLES: Record<ToastKind, string> = {
-  success: 'bg-green-600',
+  success: 'bg-emerald-600',
   error: 'bg-red-600',
-  info: 'bg-gray-800',
+  info: 'bg-gray-900',
 }
 
 export function ToastProvider({ children }: { children: ReactNode }) {
@@ -62,7 +62,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`max-w-sm rounded px-4 py-2 text-sm text-white shadow ${STYLES[toast.kind]}`}
+            className={`max-w-sm rounded-lg px-4 py-2.5 text-sm text-white shadow-lg ${STYLES[toast.kind]}`}
           >
             {toast.message}
           </div>

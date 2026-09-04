@@ -1,89 +1,111 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { EmptyState } from '../components/EmptyState'
 import { HistoryTable } from '../components/HistoryTable'
+import { CalendarIcon, ChevronDownIcon, SearchIcon } from '../components/icons'
 import { Loader } from '../components/Loader'
 import { Pagination } from '../components/Pagination'
 import { useEvaluations } from '../hooks/useEvaluation'
-import { useRubrics } from '../hooks/useRubrics'
-import type { EvaluationStatus } from '../types'
 
-const PAGE_SIZE = 10
+const PAGE_SIZE = 5
 
-const STATUS_FILTERS: { value: EvaluationStatus | ''; label: string }[] = [
-  { value: '', label: 'Todos los estados' },
-  { value: 'AI_GENERATED', label: 'Propuesta generada' },
-  { value: 'UNDER_REVIEW', label: 'En revision' },
-  { value: 'APPROVED', label: 'Aprobadas' },
-  { value: 'FAILED', label: 'Fallidas' },
+const PERIOD_OPTIONS = [
+  { value: '7', label: 'Ultimos 7 dias' },
+  { value: '30', label: 'Ultimos 30 dias' },
+  { value: '90', label: 'Ultimos 90 dias' },
+  { value: 'all', label: 'Todo el historial' },
 ]
 
 export function HistoryPage() {
-  const [status, setStatus] = useState<EvaluationStatus | ''>('')
-  const [rubricId, setRubricId] = useState<number | ''>('')
+  const [period, setPeriod] = useState('30')
+  const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
 
-  const rubrics = useRubrics()
-  const evaluations = useEvaluations({
-    status: status || undefined,
-    rubric_id: rubricId === '' ? undefined : rubricId,
+  const from = useMemo(() => {
+    if (period === 'all') return undefined
+    const date = new Date()
+    date.setDate(date.getDate() - Number(period))
+    return date.toISOString()
+  }, [period])
+
+  const evaluations = useEvaluations({ from })
+
+  const filtered = (evaluations.data ?? []).filter((item) => {
+    const query = search.trim().toLowerCase()
+    if (!query) return true
+    return (
+      item.original_filename.toLowerCase().includes(query) ||
+      item.student_identifier.toLowerCase().includes(query) ||
+      item.rubric_name.toLowerCase().includes(query)
+    )
   })
 
-  const all = evaluations.data ?? []
-  const totalPages = Math.max(1, Math.ceil(all.length / PAGE_SIZE))
-  const visible = all.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const visible = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   return (
     <div>
-      <h2 className="text-xl font-semibold">Historial de evaluaciones</h2>
+      <header className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-2xl font-semibold text-gray-900">Historial de evaluaciones</h2>
+          <p className="mt-1 text-sm text-gray-500">
+            Consulta las evaluaciones realizadas y revisa los resultados enviados a la plataforma.
+          </p>
+        </div>
+        <label className="relative">
+          <select
+            value={period}
+            onChange={(event) => {
+              setPeriod(event.target.value)
+              setPage(1)
+            }}
+            className="appearance-none rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-8 text-sm text-gray-700 focus:border-indigo-400 focus:outline-none"
+          >
+            {PERIOD_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <CalendarIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <ChevronDownIcon className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+        </label>
+      </header>
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        <select
-          value={status}
+      <div className="relative mt-5 max-w-md">
+        <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+        <input
+          value={search}
           onChange={(event) => {
-            setStatus(event.target.value as EvaluationStatus | '')
+            setSearch(event.target.value)
             setPage(1)
           }}
-          className="rounded border border-gray-300 px-3 py-1.5 text-sm"
-        >
-          {STATUS_FILTERS.map((filter) => (
-            <option key={filter.value} value={filter.value}>
-              {filter.label}
-            </option>
-          ))}
-        </select>
-        <select
-          value={rubricId}
-          onChange={(event) => {
-            setRubricId(event.target.value === '' ? '' : Number(event.target.value))
-            setPage(1)
-          }}
-          className="rounded border border-gray-300 px-3 py-1.5 text-sm"
-        >
-          <option value="">Todas las rubricas</option>
-          {(rubrics.data ?? []).map((rubric) => (
-            <option key={rubric.id} value={rubric.id}>
-              {rubric.name}
-            </option>
-          ))}
-        </select>
+          placeholder="Buscar por titulo, estudiante o actividad..."
+          className="w-full rounded-lg border border-gray-200 py-2 pl-9 pr-3 text-sm text-gray-700 placeholder:text-gray-400 focus:border-indigo-400 focus:outline-none"
+        />
       </div>
 
-      <div className="mt-4">
+      <div className="mt-5">
         {evaluations.status === 'loading' && <Loader label="Cargando historial..." />}
         {evaluations.status === 'error' && (
           <p className="text-sm text-red-600">{evaluations.error?.message}</p>
         )}
-        {evaluations.status === 'empty' && (
+        {evaluations.status !== 'loading' && evaluations.status !== 'error' && filtered.length === 0 && (
           <EmptyState
             title="Sin evaluaciones registradas"
             description="Las evaluaciones que generes apareceran aqui con su trazabilidad completa."
           />
         )}
-        {evaluations.status === 'success' && (
+        {evaluations.status !== 'loading' && evaluations.status !== 'error' && filtered.length > 0 && (
           <>
             <HistoryTable evaluations={visible} />
-            <Pagination page={page} totalPages={totalPages} onChange={setPage} />
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-gray-500">
+                Mostrando {(page - 1) * PAGE_SIZE + 1} a {Math.min(page * PAGE_SIZE, filtered.length)} de{' '}
+                {filtered.length} evaluaciones
+              </p>
+              <Pagination page={page} totalPages={totalPages} onChange={setPage} />
+            </div>
           </>
         )}
       </div>

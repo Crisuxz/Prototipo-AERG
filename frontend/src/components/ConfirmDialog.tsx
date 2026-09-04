@@ -27,14 +27,14 @@ export function ConfirmDialog({
           <button
             type="button"
             onClick={onCancel}
-            className="rounded border border-gray-300 px-3 py-1.5 text-sm"
+            className="rounded-lg border border-gray-300 px-3.5 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
             Cancelar
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className="rounded bg-purple-700 px-3 py-1.5 text-sm font-medium text-white"
+            className="rounded-lg bg-indigo-600 px-3.5 py-1.5 text-sm font-medium text-white hover:bg-indigo-700"
           >
             {confirmLabel}
           </button>

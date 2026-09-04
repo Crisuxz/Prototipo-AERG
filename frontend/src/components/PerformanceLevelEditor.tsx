@@ -1,4 +1,5 @@
 import type { PerformanceLevelInput } from '../types'
+import { PlusIcon, TrashIcon } from './icons'
 
 interface PerformanceLevelEditorProps {
   levels: PerformanceLevelInput[]
@@ -24,49 +25,49 @@ export function PerformanceLevelEditor({
   }
 
   const add = () => {
-    onChange([
-      ...levels,
-      { name: '', description: null, score: 0, order: levels.length + 1 },
-    ])
+    onChange([...levels, { name: '', description: null, score: 0, order: levels.length + 1 }])
   }
 
   return (
-    <div className="space-y-2">
-      <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
-        Niveles de desempenio
-      </p>
+    <div className="flex flex-wrap gap-2">
       {levels.map((level, index) => (
-        <div key={index} className="flex flex-wrap items-center gap-2">
-          <input
-            value={level.name}
-            disabled={disabled}
-            placeholder="Nombre del nivel"
-            onChange={(event) => update(index, { name: event.target.value })}
-            className="w-40 rounded border border-gray-300 px-2 py-1 text-sm"
-          />
-          <input
-            value={level.description ?? ''}
-            disabled={disabled}
-            placeholder="Descripcion"
-            onChange={(event) => update(index, { description: event.target.value || null })}
-            className="min-w-48 flex-1 rounded border border-gray-300 px-2 py-1 text-sm"
-          />
-          <input
-            type="number"
-            min={0}
-            step="0.5"
-            value={level.score}
-            disabled={disabled}
-            onChange={(event) => update(index, { score: Number(event.target.value) })}
-            className="w-20 rounded border border-gray-300 px-2 py-1 text-sm"
-          />
+        <div
+          key={index}
+          className="flex min-w-40 items-start gap-1 rounded-lg border border-gray-200 bg-gray-50 p-2"
+        >
+          <div className="min-w-0 flex-1">
+            <input
+              value={level.name}
+              disabled={disabled}
+              placeholder="Nivel"
+              onChange={(event) => update(index, { name: event.target.value })}
+              className="w-full rounded border border-transparent bg-transparent px-1 py-0.5 text-xs font-medium text-gray-900 focus:border-indigo-300 focus:outline-none"
+            />
+            <input
+              value={level.description ?? ''}
+              disabled={disabled}
+              placeholder="Descripcion"
+              onChange={(event) => update(index, { description: event.target.value || null })}
+              className="w-full rounded border border-transparent bg-transparent px-1 py-0.5 text-xs text-gray-500 focus:border-indigo-300 focus:outline-none"
+            />
+            <input
+              type="number"
+              min={0}
+              step="0.5"
+              value={level.score}
+              disabled={disabled}
+              onChange={(event) => update(index, { score: Number(event.target.value) })}
+              className="w-14 rounded border border-transparent bg-transparent px-1 py-0.5 text-xs text-gray-700 focus:border-indigo-300 focus:outline-none"
+            />
+          </div>
           <button
             type="button"
             disabled={disabled || levels.length === 1}
             onClick={() => remove(index)}
-            className="text-sm text-red-600 disabled:opacity-40"
+            aria-label="Quitar nivel"
+            className="rounded p-0.5 text-gray-400 hover:text-red-600 disabled:opacity-40"
           >
-            Quitar
+            <TrashIcon className="h-3.5 w-3.5" />
           </button>
         </div>
       ))}
@@ -74,9 +75,10 @@ export function PerformanceLevelEditor({
         type="button"
         disabled={disabled}
         onClick={add}
-        className="text-sm font-medium text-purple-700 disabled:opacity-40"
+        className="flex items-center gap-1 self-start rounded-lg border border-dashed border-gray-300 px-2 py-2 text-xs font-medium text-indigo-600 hover:bg-indigo-50 disabled:opacity-40"
       >
-        + Agregar nivel
+        <PlusIcon className="h-3.5 w-3.5" />
+        Nivel
       </button>
     </div>
   )

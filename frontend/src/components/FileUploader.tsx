@@ -42,7 +42,7 @@ export function FileUploader({ file, onSelect, disabled }: FileUploaderProps) {
           event.preventDefault()
           if (!disabled) handleFile(event.dataTransfer.files[0] ?? null)
         }}
-        className="rounded border border-dashed border-gray-300 bg-white p-6 text-center"
+        className="rounded-xl border border-dashed border-gray-300 bg-gray-50 p-6 text-center"
       >
         <p className="text-sm text-gray-600">
           {file ? file.name : 'Arrastra el trabajo aqui o selecciona un archivo'}
@@ -59,7 +59,7 @@ export function FileUploader({ file, onSelect, disabled }: FileUploaderProps) {
           type="button"
           disabled={disabled}
           onClick={() => inputRef.current?.click()}
-          className="mt-3 rounded border border-gray-300 px-3 py-1.5 text-sm disabled:opacity-50"
+          className="mt-3 rounded-lg border border-gray-300 bg-white px-3.5 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
         >
           Seleccionar archivo
         </button>
