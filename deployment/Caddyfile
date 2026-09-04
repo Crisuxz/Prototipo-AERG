@@ -1,0 +1,34 @@
+# Proxy inverso del prototipo AERG (ver docs/deployment.md).
+# Caddy obtiene y renueva el certificado TLS automaticamente.
+
+tu-dominio.example {
+	encode gzip
+
+	# API, documentacion OpenAPI y endpoints LTI -> backend uvicorn.
+	handle /api/* {
+		reverse_proxy 127.0.0.1:8000
+	}
+	handle /docs* {
+		reverse_proxy 127.0.0.1:8000
+	}
+	handle /openapi.json {
+		reverse_proxy 127.0.0.1:8000
+	}
+
+	# Resto -> SPA compilada. El fallback a index.html es necesario porque el
+	# enrutado lo hace react-router en el cliente.
+	handle {
+		root * /opt/aerg/frontend/dist
+		try_files {path} /index.html
+		file_server
+	}
+
+	# Debe ser coherente con MAX_UPLOAD_MB del backend.
+	request_body {
+		max_size 10MB
+	}
+
+	log {
+		output stdout
+	}
+}

@@ -1,0 +1,26 @@
+# Unidad systemd del backend. Copiar a /etc/systemd/system/aerg.service
+# y habilitar con: sudo systemctl enable --now aerg
+
+[Unit]
+Description=Asistente de Evaluacion Automatizada con Retroalimentacion Generativa
+After=network.target
+
+[Service]
+User=aerg
+Group=aerg
+WorkingDirectory=/opt/aerg/backend
+EnvironmentFile=/opt/aerg/backend/.env
+# Escucha solo en localhost: todo el trafico externo entra por el proxy inverso.
+ExecStart=/opt/aerg/backend/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000
+Restart=on-failure
+RestartSec=5
+
+# La aplicacion solo necesita escribir en el directorio de datos.
+ReadWritePaths=/var/lib/aerg
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

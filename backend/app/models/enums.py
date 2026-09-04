@@ -1,0 +1,87 @@
+"""Enumeraciones compartidas por el modelo de dominio (PLAN_MAESTRO.md Parte 4)."""
+
+from enum import Enum
+
+
+class UserRole(str, Enum):
+    TEACHER = "TEACHER"
+    ADMIN = "ADMIN"
+
+
+class UserSource(str, Enum):
+    LOCAL = "LOCAL"
+    LMS = "LMS"
+
+
+class RubricStatus(str, Enum):
+    DRAFT = "DRAFT"
+    PUBLISHED = "PUBLISHED"
+    ARCHIVED = "ARCHIVED"
+
+
+class ExtractionStatus(str, Enum):
+    PENDING = "PENDING"
+    SUCCESS = "SUCCESS"
+    FAILED = "FAILED"
+    EMPTY = "EMPTY"
+
+
+class EvaluationStatus(str, Enum):
+    DRAFT = "DRAFT"
+    PROCESSING = "PROCESSING"
+    AI_GENERATED = "AI_GENERATED"
+    UNDER_REVIEW = "UNDER_REVIEW"
+    APPROVED = "APPROVED"
+    FAILED = "FAILED"
+    CANCELLED = "CANCELLED"
+
+
+class GenerationValidationStatus(str, Enum):
+    VALID = "VALID"
+    INVALID_SCHEMA = "INVALID_SCHEMA"
+    INVALID_CRITERIA = "INVALID_CRITERIA"
+    INVALID_SCORE = "INVALID_SCORE"
+    EMPTY_RESPONSE = "EMPTY_RESPONSE"
+    TIMEOUT = "TIMEOUT"
+    HTTP_ERROR = "HTTP_ERROR"
+    BLOCKED = "BLOCKED"
+
+
+class RevisionField(str, Enum):
+    SCORE = "SCORE"
+    FEEDBACK = "FEEDBACK"
+    GENERAL_FEEDBACK = "GENERAL_FEEDBACK"
+    LEVEL = "LEVEL"
+
+
+class IncidentEntityType(str, Enum):
+    SUBMISSION = "SUBMISSION"
+    EVALUATION = "EVALUATION"
+    GENERATION = "GENERATION"
+    LMS_INTEGRATION = "LMS_INTEGRATION"
+
+
+class IncidentType(str, Enum):
+    EXTRACTION_FAILED = "EXTRACTION_FAILED"
+    EMPTY_DOCUMENT = "EMPTY_DOCUMENT"
+    SUBMISSION_TRUNCATED = "SUBMISSION_TRUNCATED"
+    SUSPICIOUS_CONTENT = "SUSPICIOUS_CONTENT"
+    GEMINI_TIMEOUT = "GEMINI_TIMEOUT"
+    GEMINI_HTTP_ERROR = "GEMINI_HTTP_ERROR"
+    GEMINI_BLOCKED = "GEMINI_BLOCKED"
+    INVALID_AI_RESPONSE = "INVALID_AI_RESPONSE"
+    AI_SCORE_CLAMPED = "AI_SCORE_CLAMPED"
+    EVALUATION_FAILED = "EVALUATION_FAILED"
+    LMS_SEND_FAILED = "LMS_SEND_FAILED"
+
+
+class IncidentSeverity(str, Enum):
+    INFO = "INFO"
+    WARNING = "WARNING"
+    ERROR = "ERROR"
+    CRITICAL = "CRITICAL"
+
+
+class LMSIntegrationType(str, Enum):
+    SIMULATOR = "SIMULATOR"
+    LTI1_3 = "LTI1_3"

@@ -1,10 +1,16 @@
 # Deployment
 
-Configuracion de despliegue del prototipo (ver `docs/PLAN_MAESTRO.md`, Parte 15).
+Artefactos de despliegue del prototipo (Parte 15 del plan). El procedimiento completo
+—requisitos, variables, instalacion, actualizacion, respaldo y migracion a
+PostgreSQL— esta en [`../docs/deployment.md`](../docs/deployment.md).
 
-Contenido previsto en iteraciones posteriores:
-- Configuracion de proxy inverso (nginx/Caddy) para servir el frontend compilado y hacer proxy al backend.
-- Variables de entorno de despliegue.
-- Instrucciones de arranque en modo produccion (`uvicorn` + `vite build`).
+| Archivo | Uso |
+|---|---|
+| `.env.production.example` | Plantilla de `backend/.env` para produccion |
+| `aerg.service` | Unidad systemd del backend (uvicorn en 127.0.0.1:8000) |
+| `Caddyfile` | Proxy inverso con TLS automatico (opcion recomendada) |
+| `nginx.conf` | Proxy inverso alternativo, con TLS gestionado por certbot |
 
-Por ahora, el arranque en desarrollo se documenta en `docs/PLAN_MAESTRO.md` (Parte 111) y en los `README.md` de `backend/` y `frontend/`.
+Topologia: un solo nodo. Caddy o nginx sirve `frontend/dist` como estaticos y hace
+proxy de `/api`, `/docs` y `/openapi.json` al backend. La base SQLite y el directorio
+de subidas viven en `/var/lib/aerg`, fuera del arbol servido.
