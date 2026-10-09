@@ -1,0 +1,13 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.5, pytest-9.1.1, pluggy-1.6.0 -- C:\Prototipo-AERG\backend\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Prototipo-AERG\backend
+plugins: anyio-4.14.2
+collecting ... collected 14 items / 10 deselected / 4 selected
+
+tests/integration/test_lms_api.py::test_rs01_instructor_crea_su_usuario_y_su_token_abre_la_api PASSED [ 25%]
+tests/integration/test_lms_api.py::test_rs01_un_token_de_sesion_expirado_es_rechazado PASSED [ 50%]
+tests/integration/test_lms_api.py::test_rs01_un_token_de_sesion_con_otro_secreto_es_rechazado PASSED [ 75%]
+tests/integration/test_lms_api.py::test_rs01_un_alumno_no_obtiene_acceso PASSED [100%]
+
+====================== 4 passed, 10 deselected in 0.55s =======================

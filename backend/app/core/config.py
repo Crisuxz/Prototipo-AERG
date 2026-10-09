@@ -14,6 +14,11 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:5173"
     auth_token: str = "prototipo-dev-token"
 
+    # Sesion del docente emitida tras un launch LTI 1.3 (RS-01).
+    session_secret: str = "prototipo-dev-session-secret"
+    session_ttl_hours: int = 8
+    frontend_url: str = "http://localhost:5173"
+
     gemini_api_key: str = ""
     gemini_model: str = "gemini-2.5-flash"
     gemini_timeout_seconds: int = 30

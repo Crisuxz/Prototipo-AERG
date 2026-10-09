@@ -16,6 +16,7 @@ from app.models.lms_integration import LMSIntegration
 from app.models.submission import Submission
 from app.schemas.lms import LMSIntegrationResponse
 from app.schemas.submission import SimulatorSubmissionRequest, SubmissionResponse
+from app.services.auth_service import AuthService
 from app.services.lms_integration_service import LMSIntegrationService
 from app.services.submission_service import SubmissionService
 
@@ -93,14 +94,20 @@ def lti_login_initiation(
 @router.post("/lti/callback", name="lti_callback")
 def lti_callback(
     db: DbSession, settings: AppSettings, id_token: str = Form(...), state: str = Form(default="")
-) -> dict:
-    """Paso 2: valida la firma y los claims del `id_token` emitido por la plataforma."""
+) -> RedirectResponse:
+    """Paso 2: valida la firma y los claims del `id_token`, identifica al docente y lo
+    redirige al frontend con un token de sesion (RS-01)."""
     config = _lti_config(db, settings)
     try:
         claims = LTI13Adapter(None, config).validate_id_token(id_token)
     except Exception as exc:
         raise DomainError("UNAUTHORIZED", "El id_token de LTI no es valido.", 401) from exc
-    return {"status": "ok", "claims": claims, "state": state}
+
+    auth = AuthService(db, settings)
+    token = auth.issue_session_token(auth.login_from_lti(claims))
+    # El token viaja en el fragmento para que no quede en logs de servidores ni proxies.
+    location = settings.frontend_url.rstrip("/") + "/#session_token=" + token
+    return RedirectResponse(location, status_code=status.HTTP_303_SEE_OTHER)
 
 
 def _lti_config(db: DbSession, settings: AppSettings) -> dict:

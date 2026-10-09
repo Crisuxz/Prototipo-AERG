@@ -190,3 +190,82 @@ def test_el_launch_construye_la_url_con_los_parametros_obligatorios():
     )
     for parameter in ("response_mode=form_post", "prompt=none", "nonce=", "state=", "login_hint="):
         assert parameter in location
+
+
+# ----------------------------------------------------- acceso del docente (RS-01)
+
+INSTRUCTOR = "http://purl.imsglobal.org/vocab/lis/v2/membership#Instructor"
+LEARNER = "http://purl.imsglobal.org/vocab/lis/v2/membership#Learner"
+
+
+def lti_callback(client, db_session, rsa_key, monkeypatch, roles: list[str]):
+    from app.models.enums import LMSIntegrationType
+    from app.models.lms_integration import LMSIntegration
+
+    db_session.add(
+        LMSIntegration(
+            name="LMS certificado", type=LMSIntegrationType.LTI1_3, config=LTI_CONFIG, is_active=False
+        )
+    )
+    db_session.commit()
+    adapter_with_local_key(rsa_key, monkeypatch)
+    token = id_token(
+        rsa_key,
+        sub="docente-lms-7",
+        name="Docente Moodle",
+        email="docente7@lms.example.edu",
+        **{"https://purl.imsglobal.org/spec/lti/claim/roles": roles},
+    )
+    return client.post("/api/lti/callback", data={"id_token": token}, follow_redirects=False)
+
+
+def test_rs01_instructor_crea_su_usuario_y_su_token_abre_la_api(
+    client, db_session, settings, rsa_key, monkeypatch
+):
+    from app.models.enums import UserSource
+    from app.models.user import User
+
+    response = lti_callback(client, db_session, rsa_key, monkeypatch, [INSTRUCTOR])
+    assert response.status_code == 303
+    location = response.headers["location"]
+    assert location.startswith(settings.frontend_url + "/#session_token=")
+    session_token = location.split("session_token=", 1)[1]
+
+    user = db_session.query(User).filter(User.external_id == "docente-lms-7").one()
+    assert user.source == UserSource.LMS
+    assert user.name == "Docente Moodle"
+    assert user.email == "docente7@lms.example.edu"
+
+    del client.headers["Authorization"]
+    rubrics = client.get("/api/rubrics", headers={"Authorization": "Bearer " + session_token})
+    assert rubrics.status_code == 200
+
+    # Un segundo launch reutiliza el mismo usuario.
+    lti_callback(client, db_session, rsa_key, monkeypatch, [INSTRUCTOR])
+    assert db_session.query(User).filter(User.external_id == "docente-lms-7").count() == 1
+
+
+def test_rs01_un_token_de_sesion_expirado_es_rechazado(client, settings):
+    from app.core.security import create_session_token
+
+    expired = create_session_token(1, settings.session_secret, ttl_hours=-1)
+    response = client.get("/api/rubrics", headers={"Authorization": "Bearer " + expired})
+    assert response.status_code == 401
+    assert response.json()["error"]["code"] == "UNAUTHORIZED"
+
+
+def test_rs01_un_token_de_sesion_con_otro_secreto_es_rechazado(client):
+    from app.core.security import create_session_token
+
+    forged = create_session_token(1, "secreto-ajeno", ttl_hours=8)
+    response = client.get("/api/rubrics", headers={"Authorization": "Bearer " + forged})
+    assert response.status_code == 401
+
+
+def test_rs01_un_alumno_no_obtiene_acceso(client, db_session, rsa_key, monkeypatch):
+    from app.models.user import User
+
+    response = lti_callback(client, db_session, rsa_key, monkeypatch, [LEARNER])
+    assert response.status_code == 403
+    assert response.json()["error"]["code"] == "FORBIDDEN"
+    assert db_session.query(User).filter(User.external_id == "docente-lms-7").count() == 0
