@@ -10,7 +10,7 @@ from fastapi.responses import RedirectResponse
 
 from app.api.deps import AppSettings, CurrentUser, DbSession
 from app.core.errors import DomainError
-from app.integrations.lms.lti13_adapter import LaunchRequest, LTI13Adapter
+from app.integrations.lms.lti13_adapter import LaunchRequest, LTI13Adapter, tool_jwks
 from app.models.enums import LMSIntegrationType
 from app.models.lms_integration import LMSIntegration
 from app.models.submission import Submission
@@ -105,16 +105,45 @@ def lti_callback(
 
     auth = AuthService(db, settings)
     token = auth.issue_session_token(auth.login_from_lti(claims))
+    integration = _lti_integration(db)
+    assignment = LMSIntegrationService(db).register_lti_launch(
+        claims, integration.id if integration else None
+    )
     # El token viaja en el fragmento para que no quede en logs de servidores ni proxies.
-    location = settings.frontend_url.rstrip("/") + "/#session_token=" + token
+    location = (
+        settings.frontend_url.rstrip("/")
+        + "/evaluar#session_token="
+        + token
+        + "&assignment_id="
+        + str(assignment.id)
+    )
     return RedirectResponse(location, status_code=status.HTTP_303_SEE_OTHER)
 
 
-def _lti_config(db: DbSession, settings: AppSettings) -> dict:
-    service = LMSIntegrationService(db)
-    integration = next(
-        (item for item in service.list() if item.type == LMSIntegrationType.LTI1_3), None
+@router.get("/lti/jwks")
+def lti_jwks(settings: AppSettings) -> dict:
+    """Llave publica de la herramienta (JWKS) para que la plataforma verifique la
+    client_assertion con la que se solicita el access_token de AGS."""
+    if not settings.lti_tool_private_key_path:
+        raise DomainError(
+            "LTI_NOT_CONFIGURED", "La herramienta no tiene una llave LTI configurada.", 409
+        )
+    return tool_jwks(settings.lti_tool_private_key_path)
+
+
+def _lti_integration(db: DbSession) -> LMSIntegration | None:
+    return next(
+        (
+            item
+            for item in LMSIntegrationService(db).list()
+            if item.type == LMSIntegrationType.LTI1_3
+        ),
+        None,
     )
+
+
+def _lti_config(db: DbSession, settings: AppSettings) -> dict:
+    integration = _lti_integration(db)
     config = LMSIntegrationService.lti_config_from_settings(settings)
     if integration:
         config.update(integration.config or {})

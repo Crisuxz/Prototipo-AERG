@@ -18,4 +18,7 @@ class Assignment(Base):
     lms_integration_id: Mapped[int | None] = mapped_column(
         ForeignKey("lms_integrations.id"), nullable=True
     )
+    # LTI 1.3: lineitem de AGS y contexto (curso) del launch que origino la actividad.
+    lti_lineitem_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    lti_context_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(default=utcnow)

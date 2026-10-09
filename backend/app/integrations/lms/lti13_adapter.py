@@ -6,20 +6,57 @@ envio de la calificacion como Score de AGS). Su prueba end-to-end contra un LMS
 certificado depende de disponibilidad de ese entorno y se declara como limitacion en el
 capitulo metodologico (OBSERVACION / RIESGO 4 del plan)."""
 
+import hashlib
+import json
 import secrets
+import time
+import uuid
 from dataclasses import dataclass
+from functools import lru_cache
+from pathlib import Path
 from typing import Any
 from urllib.parse import urlencode
 
 import httpx
 import jwt
+from cryptography.hazmat.primitives import serialization
 from jwt import PyJWKClient
+from jwt.algorithms import RSAAlgorithm
 
 from app.integrations.lms.adapter import LMSAdapter, LMSSendResult
 
 CLAIM_PREFIX = "https://purl.imsglobal.org/spec/lti/claim/"
 AGS_CLAIM = "https://purl.imsglobal.org/spec/lti-ags/claim/endpoint"
 SCORE_SCOPE = "https://purl.imsglobal.org/spec/lti-ags/scope/score"
+LINEITEM_SCOPE = "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem"
+CLIENT_ASSERTION_TYPE = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"
+
+# Cache de access_tokens de AGS por (token_url, client_id): (token, expira_en_epoch).
+_token_cache: dict[tuple[str, str], tuple[str, float]] = {}
+
+
+@lru_cache
+def load_private_key(path: str):
+    return serialization.load_pem_private_key(Path(path).read_bytes(), password=None)
+
+
+def _public_jwk(private_key_path: str) -> dict[str, Any]:
+    return json.loads(RSAAlgorithm.to_jwk(load_private_key(private_key_path).public_key()))
+
+
+def key_id(private_key_path: str) -> str:
+    """kid estable derivado de la clave publica (huella RFC 7638)."""
+    jwk = _public_jwk(private_key_path)
+    canonical = json.dumps({"e": jwk["e"], "kty": "RSA", "n": jwk["n"]}, separators=(",", ":"))
+    return jwt.utils.base64url_encode(hashlib.sha256(canonical.encode()).digest()).decode()
+
+
+def tool_jwks(private_key_path: str) -> dict[str, Any]:
+    """JWKS publico de la herramienta: la plataforma lo usa para verificar la
+    client_assertion con la que el tool pide su access_token de AGS."""
+    jwk = _public_jwk(private_key_path)
+    jwk.update({"kid": key_id(private_key_path), "alg": "RS256", "use": "sig"})
+    return {"keys": [jwk]}
 
 
 @dataclass
@@ -33,8 +70,8 @@ class LaunchRequest:
 
 
 class LTI13Adapter(LMSAdapter):
-    """`config` esperado: issuer, client_id, deployment_id, jwks_url, auth_login_url,
-    y opcionalmente access_token (obtenido por client_credentials fuera de este prototipo)."""
+    """`config` esperado: issuer, client_id, deployment_id, jwks_url, auth_login_url y,
+    para AGS, token_url y private_key_path (la llave privada de la herramienta)."""
 
     def build_login_redirect(self, request: LaunchRequest, redirect_uri: str) -> str:
         """Paso 1 del launch OIDC: la plataforma inicia el login y el tool responde con
@@ -78,15 +115,19 @@ class LTI13Adapter(LMSAdapter):
         payload["transport"] = "LTI1_3_AGS"
         payload["integration_id"] = self.integration_id
 
-        lineitem_url = self.config.get("lineitem_url")
-        access_token = self.config.get("access_token")
-        if not lineitem_url or not access_token:
+        assignment = evaluation.submission.assignment
+        lineitem_url = (assignment.lti_lineitem_url if assignment else None) or self.config.get(
+            "lineitem_url"
+        )
+        if not lineitem_url or not self.config.get("token_url") or not self.config.get(
+            "private_key_path"
+        ):
             return LMSSendResult(
                 success=False,
                 payload=payload,
                 error_message=(
-                    "La integracion LTI 1.3 no tiene lineitem_url o access_token configurados; "
-                    "no se envio la calificacion."
+                    "La integracion LTI 1.3 no tiene lineitem, token_url o llave de la "
+                    "herramienta configurados; no se envio la calificacion."
                 ),
             )
 
@@ -102,8 +143,9 @@ class LTI13Adapter(LMSAdapter):
         payload["ags_score"] = score
 
         try:
+            access_token = self.get_access_token()
             response = httpx.post(
-                lineitem_url.rstrip("/") + "/scores",
+                _scores_url(lineitem_url),
                 json=score,
                 headers={
                     "Authorization": "Bearer " + access_token,
@@ -120,3 +162,51 @@ class LTI13Adapter(LMSAdapter):
             )
 
         return LMSSendResult(success=True, payload=payload)
+
+    def get_access_token(self) -> str:
+        """OAuth2 client_credentials con client_assertion JWT firmada por la herramienta
+        (LTI Security Framework). El token se reutiliza hasta poco antes de expirar."""
+        token_url = self.config["token_url"]
+        client_id = self.config["client_id"]
+        cached = _token_cache.get((token_url, client_id))
+        if cached and cached[1] > time.time():
+            return cached[0]
+
+        key_path = self.config["private_key_path"]
+        now = int(time.time())
+        assertion = jwt.encode(
+            {
+                "iss": client_id,
+                "sub": client_id,
+                "aud": token_url,
+                "iat": now,
+                "exp": now + 300,
+                "jti": str(uuid.uuid4()),
+            },
+            load_private_key(key_path),
+            algorithm="RS256",
+            headers={"kid": key_id(key_path)},
+        )
+        response = httpx.post(
+            token_url,
+            data={
+                "grant_type": "client_credentials",
+                "client_assertion_type": CLIENT_ASSERTION_TYPE,
+                "client_assertion": assertion,
+                "scope": SCORE_SCOPE + " " + LINEITEM_SCOPE,
+            },
+            timeout=15,
+        )
+        response.raise_for_status()
+        body = response.json()
+        token = body["access_token"]
+        # Margen de 60 s para no usar un token que expire en pleno envio.
+        _token_cache[(token_url, client_id)] = (token, now + int(body.get("expires_in", 3600)) - 60)
+        return token
+
+
+def _scores_url(lineitem_url: str) -> str:
+    """El endpoint de scores es `<lineitem>/scores`, conservando la query (Moodle
+    usa `.../lineitem?type_id=N`)."""
+    base, _, query = lineitem_url.partition("?")
+    return base.rstrip("/") + "/scores" + ("?" + query if query else "")

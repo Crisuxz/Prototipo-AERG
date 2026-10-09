@@ -182,7 +182,7 @@ class EvaluationService:
         self.submissions = SubmissionRepository(db)
         self.incidents = IncidentService(db)
         self.gemini = gemini or GeminiService(settings)
-        self.lms = LMSIntegrationService(db)
+        self.lms = LMSIntegrationService(db, settings)
 
     # ------------------------------------------------------------------- lectura
 

@@ -228,8 +228,10 @@ def test_rs01_instructor_crea_su_usuario_y_su_token_abre_la_api(
     response = lti_callback(client, db_session, rsa_key, monkeypatch, [INSTRUCTOR])
     assert response.status_code == 303
     location = response.headers["location"]
-    assert location.startswith(settings.frontend_url + "/#session_token=")
-    session_token = location.split("session_token=", 1)[1]
+    assert location.startswith(settings.frontend_url + "/evaluar#session_token=")
+    fragment = dict(item.split("=", 1) for item in location.split("#", 1)[1].split("&"))
+    session_token = fragment["session_token"]
+    assert fragment["assignment_id"].isdigit()
 
     user = db_session.query(User).filter(User.external_id == "docente-lms-7").one()
     assert user.source == UserSource.LMS

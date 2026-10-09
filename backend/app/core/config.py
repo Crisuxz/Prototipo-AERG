@@ -33,6 +33,9 @@ class Settings(BaseSettings):
     lti_deployment_id: str = ""
     lti_jwks_url: str = ""
     lti_auth_login_url: str = ""
+    # AGS: endpoint OAuth2 de la plataforma y llave privada de la herramienta (fuera del repo).
+    lti_token_url: str = ""
+    lti_tool_private_key_path: str = ""
 
     @property
     def cors_origins_list(self) -> list[str]:

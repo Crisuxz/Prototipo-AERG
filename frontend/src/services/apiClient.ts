@@ -12,11 +12,17 @@ export const apiClient = axios.create({
 // Tras un launch LTI 1.3 el backend redirige con `#session_token=...` (RS-01): se guarda en
 // sessionStorage y se retira de la URL para que no quede en el historial.
 const SESSION_KEY = 'aerg_session_token'
-const launchToken = new URLSearchParams(window.location.hash.slice(1)).get('session_token')
+const ASSIGNMENT_KEY = 'aerg_lti_assignment_id'
+const launchParams = new URLSearchParams(window.location.hash.slice(1))
+const launchToken = launchParams.get('session_token')
 if (launchToken) {
   sessionStorage.setItem(SESSION_KEY, launchToken)
+  // Actividad del LMS desde la que se lanzo: los trabajos subidos se asocian a ella (RF-20).
+  sessionStorage.setItem(ASSIGNMENT_KEY, launchParams.get('assignment_id') ?? '')
   window.history.replaceState(null, '', window.location.pathname + window.location.search)
 }
+
+export const ltiAssignmentId = (): string | null => sessionStorage.getItem(ASSIGNMENT_KEY) || null
 
 // Sin sesion LTI se conserva la autenticacion de prototipo (D8): el token compartido.
 apiClient.interceptors.request.use((config) => {
