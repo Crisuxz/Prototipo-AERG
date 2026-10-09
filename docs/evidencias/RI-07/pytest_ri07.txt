@@ -1,0 +1,11 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.5, pytest-9.1.1, pluggy-1.6.0 -- C:\Prototipo-AERG\backend\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Prototipo-AERG\backend
+plugins: anyio-4.14.2
+collecting ... collected 23 items / 21 deselected / 2 selected
+
+tests/integration/test_evaluations_api.py::test_ri07_fallo_del_lms_no_revierte_la_aprobacion_y_deja_incidencia PASSED [ 50%]
+tests/integration/test_evaluations_api.py::test_ri07_una_excepcion_del_adaptador_tampoco_revierte_la_aprobacion PASSED [100%]
+
+====================== 2 passed, 21 deselected in 0.42s =======================
