@@ -8,6 +8,7 @@ const labels: Record<string, string> = {
   AI_GENERATED: 'Propuesta generada',
   UNDER_REVIEW: 'En revision',
   APPROVED: 'Enviado',
+  APPROVED_NOT_SENT: 'Aprobada, sin enviar',
   FAILED: 'Fallida',
   CANCELLED: 'Cancelada',
 }
@@ -20,11 +21,12 @@ const styles: Record<string, string> = {
   AI_GENERATED: 'bg-violet-50 text-violet-700',
   UNDER_REVIEW: 'bg-amber-50 text-amber-700',
   APPROVED: 'bg-emerald-50 text-emerald-700',
+  APPROVED_NOT_SENT: 'bg-amber-50 text-amber-700',
   FAILED: 'bg-red-50 text-red-700',
   CANCELLED: 'bg-gray-100 text-gray-500',
 }
 
-export function StatusBadge({ status }: { status: RubricStatus | EvaluationStatus }) {
+export function StatusBadge({ status }: { status: RubricStatus | EvaluationStatus | 'APPROVED_NOT_SENT' }) {
   return (
     <span
       className={`inline-block rounded-full px-2.5 py-1 text-xs font-semibold ${

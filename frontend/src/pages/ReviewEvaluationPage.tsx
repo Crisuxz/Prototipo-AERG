@@ -93,8 +93,13 @@ export function ReviewEvaluationPage() {
     setBusy(true)
     try {
       await saveReview()
-      await evaluationsApi.approve(evaluationId)
-      notify('Evaluacion aprobada y enviada al LMS.', 'success')
+      const approved = await evaluationsApi.approve(evaluationId)
+      if (approved.sent_to_lms_at) {
+        notify('Evaluacion aprobada y enviada al LMS.', 'success')
+      } else {
+        // La aprobacion se conserva aunque el LMS falle (RI-07); el docente debe saberlo.
+        notify('Evaluacion aprobada, pero no se pudo enviar al LMS. Quedo registrada como incidencia.', 'error')
+      }
       await reload()
     } catch (apiError) {
       notifyError(apiError as ApiError)

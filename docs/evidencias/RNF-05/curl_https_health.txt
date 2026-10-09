@@ -1,0 +1,33 @@
+# 2026-10-09T15:54:18-06:00  curl -vk https://localhost:8443/api/health
+* Host localhost:8443 was resolved.
+* IPv6: ::1
+* IPv4: 127.0.0.1
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+  0      0   0      0   0      0      0      0                              0*   Trying [::1]:8443...
+* schannel: disabled automatic use of client certificate
+* ALPN: curl offers http/1.1
+* ALPN: server accepted http/1.1
+* Established connection to localhost (::1 port 8443) from ::1 port 53974 
+* using HTTP/1.x
+> GET /api/health HTTP/1.1
+> Host: localhost:8443
+> User-Agent: curl/8.18.0
+> Accept: */*
+> 
+* Request completely sent off
+* schannel: remote party requests renegotiation
+* schannel: renegotiating SSL/TLS connection
+* schannel: SSL/TLS connection renegotiated
+< HTTP/1.1 200 OK
+< Alt-Svc: h3=":443"; ma=2592000
+< Content-Length: 15
+< Content-Type: application/json
+< Date: Fri, 09 Oct 2026 21:54:17 GMT
+< Server: uvicorn
+< Via: 1.1 Caddy
+< 
+{ [15 bytes data]
+100     15 100     15   0      0    257      0                              0100     15 100     15   0      0    256      0                              0100     15 100     15   0      0    255      0                              0
+* Connection #0 to host localhost:8443 left intact
+{"status":"ok"}

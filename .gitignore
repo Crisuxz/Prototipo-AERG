@@ -15,3 +15,11 @@ frontend/.env
 # General
 .DS_Store
 *.log
+
+# Artefactos locales de evidencias y secretos LTI
+backend/uploads_evidencias/
+backend/*.log
+frontend/*.log
+*.pem
+*.key
+secrets/

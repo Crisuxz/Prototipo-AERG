@@ -59,7 +59,13 @@ export function HistoryTable({ evaluations }: { evaluations: EvaluationSummary[]
                 )}
               </td>
               <td className="px-4 py-3">
-                <StatusBadge status={evaluation.status} />
+                <StatusBadge
+                  status={
+                    evaluation.status === 'APPROVED' && !evaluation.sent_to_lms_at
+                      ? 'APPROVED_NOT_SENT'
+                      : evaluation.status
+                  }
+                />
               </td>
               <td className="px-4 py-3 text-right">
                 <Link
