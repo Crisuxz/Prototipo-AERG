@@ -1,6 +1,8 @@
 # RNF-07 — Evaluación heurística de la interfaz (Nielsen, 1994)
 
 > **Elaborada con apoyo de IA; revisada y validada por los tesistas.**
+>
+> Validación: los tesistas revisaron los 13 hallazgos el 2026-10-09 y los confirmaron como correctos (columna "Validado por los tesistas").
 
 | Dato | Valor |
 |---|---|
@@ -28,19 +30,19 @@ H1 Visibilidad del estado del sistema · H2 Coincidencia entre el sistema y el m
 
 | ID | Heurística | Pantalla(s) | Hallazgo | Severidad | Recomendación | Estado | Validado por los tesistas (Sí/No/Ajuste) |
 |---|---|---|---|---|---|---|---|
-| H1-01 | H1 | Revisión, Historial | Al aprobar, la notificación siempre dice "Evaluación aprobada y enviada al LMS" y el historial muestra "Enviado" para toda evaluación `APPROVED`, aunque el envío al LMS haya fallado (caso RI-07). El docente cree que la calificación llegó al LMS cuando no fue así. | **3** | Basar el mensaje y la etiqueta en `sent_to_lms_at`. | **Corregido** | |
-| H7-01 | H7 / H8 | Las 6 pantallas en 768 y 375 px | La barra lateral fija de 256 px y el contenido sin `min-w-0` provocaban desbordamiento horizontal de toda la página en tableta y móvil (11 de 18 combinaciones). | **3** | Barra superior por debajo de `lg` y `min-w-0` en `main`. | **Corregido** (ver RNF-06) | |
-| H2-01 | H2 | Revisión | La tarjeta "Generaciones de IA" muestra códigos internos (`HTTP_ERROR`, `VALID`) en lugar de lenguaje del docente. | 2 | Traducir a "Falló la conexión con la IA" / "Propuesta válida". | Pendiente | |
-| H3-01 | H3 | Todas (barra lateral) | El botón "Cerrar sesión" no tiene acción asociada. | 2 | Implementar el cierre (borrar el token de sesión LTI de `sessionStorage`) u ocultarlo mientras se use el token compartido. En móvil quedó oculto por el ajuste de RNF-06. | Pendiente | |
-| H5-01 | H5 | Evaluar | El marcador de posición del identificador del estudiante es "Nombre o matrícula", lo que invita a capturar nombres reales. | 2 | Sugerir un identificador seudónimo ("Matrícula o ID del LMS"). | Pendiente | |
-| H6-01 | H6 | Rúbricas | El listado no muestra el estado de cada rúbrica (borrador/publicada/archivada); el docente debe recordar cuáles puede usar en "Evaluar", donde solo aparecen las publicadas. | 2 | Añadir columna de estado con `StatusBadge`. | Pendiente | |
-| H7-02 | H7 | Revisión, Historial (375 px) | En móvil las tablas se desplazan horizontalmente dentro de su tarjeta; en la revisión, la retroalimentación editable queda fuera de la vista inicial. | 2 | Vista de tarjetas apiladas por criterio en pantallas pequeñas. | Pendiente | |
-| H9-01 | H9 | Todas | El mensaje para `UNAUTHORIZED` dice "Revisa el token configurado en el frontend"; con sesiones LTI que expiran a las 8 h, el docente no sabe que debe volver a entrar desde el LMS. | 2 | "Tu sesión expiró; vuelve a abrir el asistente desde Moodle". | Pendiente | |
-| H2-02 | H2 / H4 | Todas | Textos sin acentos ni signos de apertura ("Rubricas", "Evaluacion", "Bienvenido, Docente!"). | 1 | Revisión ortográfica de los textos de la interfaz. | Pendiente | |
-| H4-01 | H4 | Inicio, Evaluar | Icono de campana (notificaciones) que no hace nada. | 1 | Retirarlo o conectarlo a las incidencias. | Pendiente | |
-| H4-02 | H4 | Revisión, Detalle de rúbrica | Enlaces de regreso inconsistentes: "Volver a selección" (destino poco claro) frente a "Volver al listado". | 1 | Unificar como "Volver a …" con el nombre del destino. | Pendiente | |
-| H8-01 | H8 | Detalle de rúbrica | Las descripciones de los criterios se truncan sin forma de leerlas completas. | 1 | Ajuste de línea o `title` con el texto completo. | Pendiente | |
-| H10-01 | H10 | Todas | No hay ayuda contextual (qué hace "Solicitar nueva evaluación", cómo se ponderan los pesos). | 1 | Textos de ayuda breves o enlace al manual de usuario. | Pendiente | |
+| H1-01 | H1 | Revisión, Historial | Al aprobar, la notificación siempre dice "Evaluación aprobada y enviada al LMS" y el historial muestra "Enviado" para toda evaluación `APPROVED`, aunque el envío al LMS haya fallado (caso RI-07). El docente cree que la calificación llegó al LMS cuando no fue así. | **3** | Basar el mensaje y la etiqueta en `sent_to_lms_at`. | **Corregido** | Sí |
+| H7-01 | H7 / H8 | Las 6 pantallas en 768 y 375 px | La barra lateral fija de 256 px y el contenido sin `min-w-0` provocaban desbordamiento horizontal de toda la página en tableta y móvil (11 de 18 combinaciones). | **3** | Barra superior por debajo de `lg` y `min-w-0` en `main`. | **Corregido** (ver RNF-06) | Sí |
+| H2-01 | H2 | Revisión | La tarjeta "Generaciones de IA" muestra códigos internos (`HTTP_ERROR`, `VALID`) en lugar de lenguaje del docente. | 2 | Traducir a "Falló la conexión con la IA" / "Propuesta válida". | Pendiente | Sí |
+| H3-01 | H3 | Todas (barra lateral) | El botón "Cerrar sesión" no tiene acción asociada. | 2 | Implementar el cierre (borrar el token de sesión LTI de `sessionStorage`) u ocultarlo mientras se use el token compartido. En móvil quedó oculto por el ajuste de RNF-06. | Pendiente | Sí |
+| H5-01 | H5 | Evaluar | El marcador de posición del identificador del estudiante es "Nombre o matrícula", lo que invita a capturar nombres reales. | 2 | Sugerir un identificador seudónimo ("Matrícula o ID del LMS"). | Pendiente | Sí |
+| H6-01 | H6 | Rúbricas | El listado no muestra el estado de cada rúbrica (borrador/publicada/archivada); el docente debe recordar cuáles puede usar en "Evaluar", donde solo aparecen las publicadas. | 2 | Añadir columna de estado con `StatusBadge`. | Pendiente | Sí |
+| H7-02 | H7 | Revisión, Historial (375 px) | En móvil las tablas se desplazan horizontalmente dentro de su tarjeta; en la revisión, la retroalimentación editable queda fuera de la vista inicial. | 2 | Vista de tarjetas apiladas por criterio en pantallas pequeñas. | Pendiente | Sí |
+| H9-01 | H9 | Todas | El mensaje para `UNAUTHORIZED` dice "Revisa el token configurado en el frontend"; con sesiones LTI que expiran a las 8 h, el docente no sabe que debe volver a entrar desde el LMS. | 2 | "Tu sesión expiró; vuelve a abrir el asistente desde Moodle". | Pendiente | Sí |
+| H2-02 | H2 / H4 | Todas | Textos sin acentos ni signos de apertura ("Rubricas", "Evaluacion", "Bienvenido, Docente!"). | 1 | Revisión ortográfica de los textos de la interfaz. | Pendiente | Sí |
+| H4-01 | H4 | Inicio, Evaluar | Icono de campana (notificaciones) que no hace nada. | 1 | Retirarlo o conectarlo a las incidencias. | Pendiente | Sí |
+| H4-02 | H4 | Revisión, Detalle de rúbrica | Enlaces de regreso inconsistentes: "Volver a selección" (destino poco claro) frente a "Volver al listado". | 1 | Unificar como "Volver a …" con el nombre del destino. | Pendiente | Sí |
+| H8-01 | H8 | Detalle de rúbrica | Las descripciones de los criterios se truncan sin forma de leerlas completas. | 1 | Ajuste de línea o `title` con el texto completo. | Pendiente | Sí |
+| H10-01 | H10 | Todas | No hay ayuda contextual (qué hace "Solicitar nueva evaluación", cómo se ponderan los pesos). | 1 | Textos de ayuda breves o enlace al manual de usuario. | Pendiente | Sí |
 
 ### Aspectos positivos observados (severidad 0)
 

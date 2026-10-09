@@ -23,7 +23,7 @@
 4. El backend obtiene un `access_token` (client_credentials con `client_assertion` firmada con la llave de la herramienta) y publica el *Score* en `<lineitem>/scores`.
 5. Se compara la calificación enviada (`final_total_score` de la respuesta de aprobación) con la recibida (`m_grade_grades.finalgrade` del alumno en la actividad), y se captura el libro de calificaciones.
 
-## Resultados (20 ejecuciones en 2 tandas de 10)
+## Resultados (24 ejecuciones: 2 tandas de 10 y una tercera tanda detenida tras 4)
 
 | Ejecución | Resultado | Calificación enviada | Calificación recibida en Moodle | Tiempo (s) | Causa del fallo | Capturas |
 |---|---|---|---|---|---|---|
@@ -47,14 +47,18 @@
 | 2-08 | Fallo | — | — | 126 | Gemini no generó la propuesta (HTTP 5xx/timeout); no se llegó al envío LTI | [error](tanda2/ejecucion_08_error.png) |
 | 2-09 | Fallo | — | — | 125.9 | Gemini no generó la propuesta (HTTP 5xx/timeout); no se llegó al envío LTI | [error](tanda2/ejecucion_09_error.png) |
 | 2-10 | Éxito | 50 | 50 | 26.6 | — | [launch](tanda2/ejecucion_10_1_asistente_tras_launch.png) · [aprobada](tanda2/ejecucion_10_2_aprobada.png) · [libro](tanda2/ejecucion_10_3_libro_calificaciones.png) |
+| 3-01 | Fallo | — | — | 126 | Gemini respondió 429 (cuota/limite de tasa agotado); no se llegó al envío LTI | [error](tanda3/ejecucion_01_error.png) |
+| 3-02 | Fallo | — | — | 126 | Gemini respondió 429 (cuota/limite de tasa agotado); no se llegó al envío LTI | [error](tanda3/ejecucion_02_error.png) |
+| 3-03 | Fallo | — | — | 125.9 | Gemini respondió 429 (cuota/limite de tasa agotado); no se llegó al envío LTI | [error](tanda3/ejecucion_03_error.png) |
+| 3-04 | Fallo | — | — | 125.9 | Gemini respondió 429 (cuota/limite de tasa agotado); no se llegó al envío LTI | [error](tanda3/ejecucion_04_error.png) |
 
 ## Resumen
 
 | Indicador | Valor |
 |---|---|
-| Ejecuciones totales | 20 |
-| Éxitos de punta a punta | 9 (45 %) |
-| Fallos | 11, **todos** en la generación con Gemini (10 `GEMINI_HTTP_ERROR` por 503/504 del proveedor y 1 `GEMINI_TIMEOUT`), registrados como incidencias en `incident_logs` |
+| Ejecuciones totales | 24 (tanda 3 detenida tras 4 ejecuciones) |
+| Éxitos de punta a punta | 9 de 24 |
+| Fallos | 15, **todos** en la generación con Gemini: tandas 1 y 2, 10 `GEMINI_HTTP_ERROR` por 503/504 y 1 `GEMINI_TIMEOUT`; tanda 3, 4 `GEMINI_HTTP_ERROR` por **429** (cuota agotada). Todos quedaron como incidencias en `incident_logs` |
 | Fallos atribuibles a LTI (launch, sesión, token AGS, envío de score) | **0** |
 | Ejecuciones que llegaron a la aprobación | 9; en las 9 la calificación recibida en Moodle **coincide exactamente** con la enviada |
 | Tiempo medio de una ejecución exitosa | 31.8 s (incluye la generación con Gemini) |
@@ -63,6 +67,8 @@ Además, una corrida de prueba previa a las tandas (no incluida en la tabla) ter
 
 ## Conclusión
 
-La cadena LTI 1.3 (launch OIDC, sesión del docente, AGS con token OAuth2 y envío de la calificación) funcionó en el 100 % de las ejecuciones que llegaron a ella (9/9). La meta de 10 ejecuciones exitosas de punta a punta **no se alcanzó** por la indisponibilidad intermitente de la API de Gemini durante la prueba (errores 503 "Service Unavailable" y 504 del proveedor), ajena a la integración. Conforme a la regla acordada (no más de dos intentos), no se lanzó una tercera tanda.
+La cadena LTI 1.3 (launch OIDC, sesión del docente, token AGS por OAuth2 y envío de la calificación) funcionó en el **100 % de las ejecuciones que llegaron a ella (9/9)**. En las 24 ejecuciones el launch y la entrada al asistente fueron correctos, y en las 9 aprobaciones la calificación recibida en Moodle coincidió exactamente con la enviada.
 
-**Pendiente para cerrar I6 con 10/10:** repetir `node e2e/flujo_lti_moodle.mjs 10 ../docs/evidencias/LTI/tanda3` en un horario con menor carga de Gemini o con una clave de nivel de pago (ver RS-07).
+La meta de 10 ejecuciones exitosas de punta a punta **no se alcanzó** por la API de Gemini, ajena a la integración: errores 503/504 intermitentes en las tandas 1 y 2, y en la tanda 3 un **429** constante, que indica que se agotó la cuota o el límite de tasa del proyecto. La tanda 3 se detuvo tras 4 fallos seguidos, porque las demás ejecuciones fallarían igual hasta que se restablezca la cuota.
+
+**Pendiente para cerrar I6 con 10/10:** revisar en Google Cloud la cuota y los límites de tasa del modelo, o esperar a que se restablezcan, y ejecutar desde `frontend/` `node e2e/flujo_lti_moodle.mjs 10 ../docs/evidencias/LTI/tanda4`.

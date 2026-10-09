@@ -65,7 +65,7 @@ Recorrido del texto:
 
 Con el **nivel gratuito**, el texto de los trabajos puede usarse para mejorar y entrenar los modelos de Google y ser leído por revisores humanos, y los términos prohíben expresamente enviar información personal. Por lo tanto, **el nivel gratuito no es aceptable para trabajos reales de estudiantes**. Con el **nivel de pago**, Google no usa los prompts ni las respuestas para mejorar sus productos y solo los conserva por un periodo limitado para detectar abusos, lo que es compatible con RS-07 siempre que no se active el registro opcional ni se compartan datasets.
 
-No fue posible determinar desde el repositorio en qué nivel está la clave configurada en `backend/.env`: depende de si el proyecto de Google Cloud asociado tiene facturación activa, y eso solo puede comprobarlo el titular en la consola.
+**Nivel de la clave en uso:** confirmado por los tesistas el 2026-10-09: el proyecto de Google Cloud asociado a la clave de `backend/.env` tiene la facturación activa, es decir, usa el **nivel de pago**. Este dato no puede verificarse desde el repositorio; lo comprueba el titular en la consola de Google Cloud.
 
 ## Recomendación
 

@@ -1,0 +1,34 @@
+[
+  {
+    "run": 1,
+    "success": false,
+    "sent": null,
+    "received": null,
+    "seconds": 126,
+    "error": "page.waitForURL: Timeout 120000ms exceeded."
+  },
+  {
+    "run": 2,
+    "success": false,
+    "sent": null,
+    "received": null,
+    "seconds": 126,
+    "error": "page.waitForURL: Timeout 120000ms exceeded."
+  },
+  {
+    "run": 3,
+    "success": false,
+    "sent": null,
+    "received": null,
+    "seconds": 125.9,
+    "error": "page.waitForURL: Timeout 120000ms exceeded."
+  },
+  {
+    "run": 4,
+    "success": false,
+    "sent": null,
+    "received": null,
+    "seconds": 125.9,
+    "error": "page.waitForURL: Timeout 120000ms exceeded."
+  }
+]
