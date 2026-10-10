@@ -1,0 +1,18 @@
+# Verificacion local de HTTPS (RNF-05, RS-04).
+# Requisitos: backend en el host (uvicorn en el puerto 8000) y `npm run build` en frontend/.
+# Uso: docker compose -f deployment/docker-compose.https.yml up -d
+services:
+  caddy:
+    image: caddy:2
+    ports:
+      - "8443:443"
+      - "8080:80"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./https/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ../frontend/dist:/srv/frontend:ro
+      - caddy_data:/data
+
+volumes:
+  caddy_data:

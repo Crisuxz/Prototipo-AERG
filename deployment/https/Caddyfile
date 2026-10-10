@@ -1,0 +1,37 @@
+# Verificacion local de HTTPS (RNF-05, RS-04). Certificado de la CA interna de Caddy.
+# Solo para pruebas en la maquina de desarrollo; en produccion usar deployment/Caddyfile.
+
+{
+	# Los puertos publicados en el host son 8443/8080; dentro del contenedor, 443/80.
+	http_port 80
+	https_port 443
+}
+
+http://localhost {
+	redir https://localhost:8443{uri} permanent
+}
+
+https://localhost {
+	tls internal
+	encode gzip
+
+	handle /api/* {
+		reverse_proxy host.docker.internal:8000
+	}
+	handle /docs* {
+		reverse_proxy host.docker.internal:8000
+	}
+	handle /openapi.json {
+		reverse_proxy host.docker.internal:8000
+	}
+
+	handle {
+		root * /srv/frontend
+		try_files {path} /index.html
+		file_server
+	}
+
+	request_body {
+		max_size 10MB
+	}
+}

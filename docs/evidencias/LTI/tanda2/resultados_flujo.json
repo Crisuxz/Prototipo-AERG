@@ -1,0 +1,82 @@
+[
+  {
+    "run": 1,
+    "success": false,
+    "sent": null,
+    "received": null,
+    "seconds": 126.3,
+    "error": "page.waitForURL: Timeout 120000ms exceeded."
+  },
+  {
+    "run": 2,
+    "success": true,
+    "sent": 25,
+    "received": 25,
+    "seconds": 26.3,
+    "error": ""
+  },
+  {
+    "run": 3,
+    "success": true,
+    "sent": 25,
+    "received": 25,
+    "seconds": 26.7,
+    "error": ""
+  },
+  {
+    "run": 4,
+    "success": true,
+    "sent": 50,
+    "received": 50,
+    "seconds": 27.7,
+    "error": ""
+  },
+  {
+    "run": 5,
+    "success": false,
+    "sent": null,
+    "received": null,
+    "seconds": 126.1,
+    "error": "page.waitForURL: Timeout 120000ms exceeded."
+  },
+  {
+    "run": 6,
+    "success": false,
+    "sent": null,
+    "received": null,
+    "seconds": 126.8,
+    "error": "page.waitForURL: Timeout 120000ms exceeded."
+  },
+  {
+    "run": 7,
+    "success": false,
+    "sent": null,
+    "received": null,
+    "seconds": 126.5,
+    "error": "page.waitForURL: Timeout 120000ms exceeded."
+  },
+  {
+    "run": 8,
+    "success": false,
+    "sent": null,
+    "received": null,
+    "seconds": 126,
+    "error": "page.waitForURL: Timeout 120000ms exceeded."
+  },
+  {
+    "run": 9,
+    "success": false,
+    "sent": null,
+    "received": null,
+    "seconds": 125.9,
+    "error": "page.waitForURL: Timeout 120000ms exceeded."
+  },
+  {
+    "run": 10,
+    "success": true,
+    "sent": 50,
+    "received": 50,
+    "seconds": 26.6,
+    "error": ""
+  }
+]

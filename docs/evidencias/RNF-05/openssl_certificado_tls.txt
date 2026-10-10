@@ -1,0 +1,85 @@
+# 2026-10-09T15:54:26-06:00  openssl s_client -connect localhost:8443 -servername localhost
+Connecting to ::1
+depth=1 CN=Caddy Local Authority - ECC Intermediate
+verify error:num=20:unable to get local issuer certificate
+verify return:1
+depth=0 
+verify return:1
+CONNECTED(000001BC)
+---
+Certificate chain
+ 0 s:
+   i:CN=Caddy Local Authority - ECC Intermediate
+   a:PKEY: EC, (prime256v1); sigalg: ecdsa-with-SHA256
+   v:NotBefore: Oct  9 21:53:54 2026 GMT; NotAfter: Oct 10 09:53:54 2026 GMT
+ 1 s:CN=Caddy Local Authority - ECC Intermediate
+   i:CN=Caddy Local Authority - 2026 ECC Root
+   a:PKEY: EC, (prime256v1); sigalg: ecdsa-with-SHA256
+   v:NotBefore: Oct  9 21:53:54 2026 GMT; NotAfter: Oct 16 21:53:54 2026 GMT
+---
+Server certificate
+-----BEGIN CERTIFICATE-----
+K7ITk8ce4xSrg0taTMVUszPh
+-----END CERTIFICATE-----
+subject=
+issuer=CN=Caddy Local Authority - ECC Intermediate
+---
+No client certificate CA names sent
+Peer signing digest: SHA256
+Peer signature type: ecdsa_secp256r1_sha256
+Negotiated TLS1.3 group: X25519MLKEM768
+---
+SSL handshake has read 2363 bytes and written 1613 bytes
+Verification error: unable to get local issuer certificate
+---
+New, TLSv1.3, Cipher is TLS_AES_128_GCM_SHA256
+Protocol: TLSv1.3
+Server public key is 256 bit
+This TLS version forbids renegotiation.
+Compression: NONE
+Expansion: NONE
+No ALPN negotiated
+Early data was not sent
+Verify return code: 20 (unable to get local issuer certificate)
+---
+HTTP/1.1 400 Bad Request
+Content-Type: text/plain; charset=utf-8
+Connection: close
+
+400 Bad Request---
+Post-Handshake New Session Ticket arrived:
+SSL-Session:
+    Protocol  : TLSv1.3
+    Cipher    : TLS_AES_128_GCM_SHA256
+    Session-ID: FB07ADE0A84F8E4016B6F1D93007E56B92049C41D517F0BB4693BC890F2C80F6
+    Session-ID-ctx: 
+    Resumption PSK: 11B0F388D7C02E23B39FEF7F9257D3E693245D321989659BD33AEF94DDAB3657
+    PSK identity: None
+    PSK identity hint: None
+    SRP username: None
+    TLS session ticket lifetime hint: 604800 (seconds)
+    TLS session ticket:
+    0000 - cf d0 05 0c 40 8c 54 6b-0d 31 d3 52 5f 46 3d b2   ....@.Tk.1.R_F=.
+    0010 - 5f 64 be 10 14 76 d1 cf-a3 95 f7 e2 65 85 10 4e   _d...v......e..N
+    0020 - 77 52 69 fa ed bb bd c1-7c a0 38 f7 12 6a 17 aa   wRi.....|.8..j..
+    0030 - 7c c3 77 b7 f1 5f e6 76-6e 40 03 ba d7 d2 5d 6e   |.w.._.vn@....]n
+    0040 - b5 a6 db 49 b3 35 8b f2-5c cf 84 22 8d da 4b 00   ...I.5..\.."..K.
+    0050 - ff 59 bc 95 f9 76 71 05-f2 93 00 c9 1b 9e ed 7b   .Y...vq........{
+    0060 - a9 c2 9f 9b 3a f8 cb b3-4b                        ....:...K
+
+    Start Time: 1791582866
+    Timeout   : 7200 (sec)
+    Verify return code: 20 (unable to get local issuer certificate)
+    Extended master secret: no
+    Max Early Data: 0
+---
+read R BLOCK
+closed
+
+# Detalle del certificado servido
+subject=
+issuer=CN=Caddy Local Authority - ECC Intermediate
+notBefore=Oct  9 21:53:54 2026 GMT
+notAfter=Oct 10 09:53:54 2026 GMT
+X509v3 Subject Alternative Name: critical
+    DNS:localhost

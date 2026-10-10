@@ -304,3 +304,76 @@ def test_editar_la_rubrica_no_altera_evaluaciones_previas(
     assert detail["rubric_version_snapshot"]["version"] == 1
     assert len(detail["rubric_version_snapshot"]["criteria"]) == 3
     assert detail["final_total_score"] == 100.0
+
+
+def test_ri07_fallo_del_lms_no_revierte_la_aprobacion_y_deja_incidencia(
+    client, fake_gemini, published_rubric, submission, monkeypatch
+):
+    from app.integrations.lms.adapter import LMSSendResult
+    from app.integrations.lms.simulator_adapter import SimulatorAdapter
+
+    def failing_send(self, evaluation):
+        return LMSSendResult(
+            success=False, payload={}, error_message="El LMS no respondio (fallo forzado)."
+        )
+
+    monkeypatch.setattr(SimulatorAdapter, "send_result", failing_send)
+    fake_gemini.responses = [valid_result(criteria_for(published_rubric))]
+    created = create(client, submission, published_rubric).json()
+
+    approved = client.post("/api/evaluations/" + str(created["id"]) + "/approve")
+    assert approved.status_code == 200
+    assert approved.json()["status"] == "APPROVED"
+    assert approved.json()["sent_to_lms_at"] is None
+
+    detail = client.get("/api/evaluations/" + str(created["id"])).json()
+    assert detail["status"] == "APPROVED"
+    incidents = client.get("/api/incidents").json()
+    assert any(item["incident_type"] == "LMS_SEND_FAILED" for item in incidents)
+
+
+def test_ri07_una_excepcion_del_adaptador_tampoco_revierte_la_aprobacion(
+    client, fake_gemini, published_rubric, submission, monkeypatch
+):
+    from app.integrations.lms.simulator_adapter import SimulatorAdapter
+
+    def raising_send(self, evaluation):
+        raise ConnectionError("conexion rechazada por el LMS")
+
+    monkeypatch.setattr(SimulatorAdapter, "send_result", raising_send)
+    fake_gemini.responses = [valid_result(criteria_for(published_rubric))]
+    created = create(client, submission, published_rubric).json()
+
+    approved = client.post("/api/evaluations/" + str(created["id"]) + "/approve")
+    assert approved.status_code == 200
+    assert approved.json()["status"] == "APPROVED"
+    incidents = client.get("/api/incidents").json()
+    assert any(item["incident_type"] == "LMS_SEND_FAILED" for item in incidents)
+
+
+def test_ri04_trabajo_mas_largo_que_el_limite_se_recorta_y_deja_incidencia(
+    client, fake_gemini, settings, published_rubric
+):
+    captured = {}
+    original_evaluate = fake_gemini.evaluate
+
+    def capturing_evaluate(context):
+        captured["text"] = context.submission_text
+        return original_evaluate(context)
+
+    fake_gemini.evaluate = capturing_evaluate
+    long_text = ("Parrafo del ensayo. " * 1000).encode()
+    assert len(long_text) > settings.max_submission_chars
+    submission = client.post(
+        "/api/submissions",
+        files={"file": ("largo.txt", long_text, "text/plain")},
+        data={"student_identifier": "Estudiante 1"},
+    ).json()
+
+    fake_gemini.responses = [valid_result(criteria_for(published_rubric))]
+    response = create(client, submission, published_rubric)
+    assert response.status_code == 201
+    assert len(captured["text"]) == settings.max_submission_chars
+
+    incidents = client.get("/api/incidents").json()
+    assert any(item["incident_type"] == "SUBMISSION_TRUNCATED" for item in incidents)

@@ -34,7 +34,9 @@ def temp_dir():
 
 @pytest.fixture
 def settings(temp_dir) -> Settings:
+    # Sin leer backend/.env: la suite no debe depender de la configuracion local.
     return Settings(
+        _env_file=None,
         env="test",
         database_url="sqlite://",
         auth_token="test-token",

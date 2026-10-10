@@ -176,3 +176,38 @@ def test_un_error_no_controlado_no_expone_el_traceback(db_session, settings):
     }
     assert "Traceback" not in response.text
     assert "rutas/secretas" not in response.text
+
+
+def test_rs06_el_texto_del_trabajo_y_la_api_key_no_llegan_a_logs_ni_incidencias(
+    client, settings, fake_gemini, published_rubric, caplog
+):
+    import logging
+
+    from app.models.enums import GenerationValidationStatus
+    from tests.conftest import failed_result
+
+    settings.gemini_api_key = "AIzaSy-clave-unica-rs06"
+    frase_unica = "El ornitorrinco violeta de Tlacotalpan custodia la frase RS06"
+    caplog.set_level(logging.DEBUG)
+
+    trabajo = client.post(
+        "/api/submissions",
+        files={"file": ("ensayo.txt", frase_unica.encode(), "text/plain")},
+        data={"student_identifier": "Estudiante 1"},
+    ).json()
+    fake_gemini.responses = [
+        failed_result(GenerationValidationStatus.HTTP_ERROR, "El servicio no esta disponible.")
+    ]
+    response = client.post(
+        "/api/evaluations",
+        json={"submission_id": trabajo["id"], "rubric_id": published_rubric["id"]},
+    )
+    assert response.status_code == 502
+
+    incidencias = client.get("/api/incidents")
+    assert any(item["incident_type"] == "GEMINI_HTTP_ERROR" for item in incidencias.json())
+    assert caplog.records, "Se esperaba al menos un registro de log del fallo"
+    for texto in (incidencias.text, caplog.text, response.text):
+        assert frase_unica not in texto
+        assert "ornitorrinco" not in texto
+        assert settings.gemini_api_key not in texto

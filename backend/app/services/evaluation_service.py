@@ -14,6 +14,7 @@ from app.core.config import Settings
 from app.core.errors import DomainError
 from app.integrations.gemini.prompt_builder import EvaluationContext, detect_suspicious_content
 from app.integrations.gemini.service import GeminiCallResult, GeminiService
+from app.integrations.lms.adapter import LMSSendResult
 from app.models.enums import (
     EvaluationStatus,
     GenerationValidationStatus,
@@ -181,7 +182,7 @@ class EvaluationService:
         self.submissions = SubmissionRepository(db)
         self.incidents = IncidentService(db)
         self.gemini = gemini or GeminiService(settings)
-        self.lms = LMSIntegrationService(db)
+        self.lms = LMSIntegrationService(db, settings)
 
     # ------------------------------------------------------------------- lectura
 
@@ -526,7 +527,15 @@ class EvaluationService:
         adapter = self.lms.get_active_adapter()
         if adapter is None:
             return
-        result = adapter.send_result(evaluation)
+        try:
+            result = adapter.send_result(evaluation)
+        except Exception:
+            logger.exception("El adaptador LMS lanzo una excepcion al enviar el resultado.")
+            result = LMSSendResult(
+                success=False,
+                payload={},
+                error_message="El adaptador LMS fallo de forma inesperada al enviar el resultado.",
+            )
         evaluation.lms_result_payload = result.payload
         if result.success:
             evaluation.sent_to_lms_at = datetime.now(timezone.utc)

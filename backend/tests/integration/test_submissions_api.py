@@ -65,6 +65,44 @@ def test_subir_pdf_es_aceptado(client):
         assert response.json()["error"]["code"] == "EMPTY_DOCUMENT"
 
 
+def minimal_text_pdf(text: str) -> bytes:
+    """PDF 1.4 minimo construido a mano: una pagina con un objeto de texto en Helvetica."""
+    stream = ("BT /F1 12 Tf 20 100 Td (" + text + ") Tj ET").encode("latin-1")
+    objects = [
+        b"<< /Type /Catalog /Pages 2 0 R >>",
+        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 300 200] "
+        b"/Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>",
+        b"<< /Length " + str(len(stream)).encode() + b" >>\nstream\n" + stream + b"\nendstream",
+        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+    ]
+    body = b"%PDF-1.4\n"
+    offsets = []
+    for number, content in enumerate(objects, start=1):
+        offsets.append(len(body))
+        body += str(number).encode() + b" 0 obj\n" + content + b"\nendobj\n"
+    xref_offset = len(body)
+    body += b"xref\n0 " + str(len(objects) + 1).encode() + b"\n0000000000 65535 f \n"
+    for offset in offsets:
+        body += ("%010d 00000 n \n" % offset).encode()
+    body += (
+        b"trailer\n<< /Size " + str(len(objects) + 1).encode() + b" /Root 1 0 R >>\n"
+        b"startxref\n" + str(xref_offset).encode() + b"\n%%EOF\n"
+    )
+    return body
+
+
+def test_rf05_pdf_con_capa_de_texto_extrae_el_texto(client):
+    response = upload(
+        client, "ensayo.pdf", minimal_text_pdf("Fotosintesis en plantas C4"), "application/pdf"
+    )
+    assert response.status_code == 201
+    body = response.json()
+    assert body["extraction_status"] == "SUCCESS"
+    assert body["file_extension"] == "pdf"
+    assert "Fotosintesis en plantas C4" in body["extracted_text"]
+
+
 def test_extension_no_soportada_es_rechazada(client):
     response = upload(client, "malicioso.exe", b"MZ binario", "application/octet-stream")
     assert response.status_code == 400

@@ -14,6 +14,11 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:5173"
     auth_token: str = "prototipo-dev-token"
 
+    # Sesion del docente emitida tras un launch LTI 1.3 (RS-01).
+    session_secret: str = "prototipo-dev-session-secret"
+    session_ttl_hours: int = 8
+    frontend_url: str = "http://localhost:5173"
+
     gemini_api_key: str = ""
     gemini_model: str = "gemini-2.5-flash"
     gemini_timeout_seconds: int = 30
@@ -28,6 +33,9 @@ class Settings(BaseSettings):
     lti_deployment_id: str = ""
     lti_jwks_url: str = ""
     lti_auth_login_url: str = ""
+    # AGS: endpoint OAuth2 de la plataforma y llave privada de la herramienta (fuera del repo).
+    lti_token_url: str = ""
+    lti_tool_private_key_path: str = ""
 
     @property
     def cors_origins_list(self) -> list[str]:

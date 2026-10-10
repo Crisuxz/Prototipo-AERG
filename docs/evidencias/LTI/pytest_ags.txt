@@ -1,0 +1,25 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.5, pytest-9.1.1, pluggy-1.6.0 -- C:\Prototipo-AERG\backend\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Prototipo-AERG\backend
+plugins: anyio-4.14.2
+collecting ... collected 16 items
+
+tests/integration/test_lti_ags.py::test_el_jwks_expone_la_llave_publica_de_la_herramienta PASSED [  6%]
+tests/integration/test_lti_ags.py::test_el_endpoint_jwks PASSED          [ 12%]
+tests/integration/test_lti_ags.py::test_envio_correcto_obtiene_token_y_publica_el_score PASSED [ 18%]
+tests/integration/test_lti_ags.py::test_el_access_token_se_reutiliza_hasta_que_expira PASSED [ 25%]
+tests/integration/test_lti_ags.py::test_configuracion_faltante_no_llama_al_lms[missing0] PASSED [ 31%]
+tests/integration/test_lti_ags.py::test_configuracion_faltante_no_llama_al_lms[missing1] PASSED [ 37%]
+tests/integration/test_lti_ags.py::test_configuracion_faltante_no_llama_al_lms[missing2] PASSED [ 43%]
+tests/integration/test_lti_ags.py::test_el_lms_rechaza_el_score[400] PASSED [ 50%]
+tests/integration/test_lti_ags.py::test_el_lms_rechaza_el_score[401] PASSED [ 56%]
+tests/integration/test_lti_ags.py::test_el_lms_rechaza_el_score[403] PASSED [ 62%]
+tests/integration/test_lti_ags.py::test_el_lms_rechaza_el_score[500] PASSED [ 68%]
+tests/integration/test_lti_ags.py::test_el_lms_rechaza_el_score[503] PASSED [ 75%]
+tests/integration/test_lti_ags.py::test_falla_la_obtencion_del_token[400] PASSED [ 81%]
+tests/integration/test_lti_ags.py::test_falla_la_obtencion_del_token[401] PASSED [ 87%]
+tests/integration/test_lti_ags.py::test_falla_la_obtencion_del_token[500] PASSED [ 93%]
+tests/integration/test_lti_ags.py::test_el_launch_guarda_lineitem_y_contexto_en_la_actividad PASSED [100%]
+
+============================= 16 passed in 1.63s ==============================

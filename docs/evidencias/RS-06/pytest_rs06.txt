@@ -1,0 +1,10 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.5, pytest-9.1.1, pluggy-1.6.0 -- C:\Prototipo-AERG\backend\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Prototipo-AERG\backend
+plugins: anyio-4.14.2
+collecting ... collected 12 items / 11 deselected / 1 selected
+
+tests/security/test_seguridad.py::test_rs06_el_texto_del_trabajo_y_la_api_key_no_llegan_a_logs_ni_incidencias PASSED [100%]
+
+====================== 1 passed, 11 deselected in 0.20s =======================

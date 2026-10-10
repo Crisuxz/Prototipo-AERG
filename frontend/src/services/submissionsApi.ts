@@ -1,11 +1,13 @@
 import type { Submission } from '../types'
-import { apiClient } from './apiClient'
+import { apiClient, ltiAssignmentId } from './apiClient'
 
 export const submissionsApi = {
   async upload(file: File, studentIdentifier: string): Promise<Submission> {
     const form = new FormData()
     form.append('file', file)
     form.append('student_identifier', studentIdentifier)
+    const assignmentId = ltiAssignmentId()
+    if (assignmentId) form.append('assignment_id', assignmentId)
     const { data } = await apiClient.post<Submission>('/submissions', form)
     return data
   },
