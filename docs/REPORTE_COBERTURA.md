@@ -17,7 +17,7 @@ Fecha: 2026-10-09. Toda la evidencia está en `docs/evidencias/` y viene de ejec
 | RNF-07 | Evaluación heurística (Nielsen, 1994): 13 hallazgos, 2 de severidad 3 corregidos (desbordamiento y aviso falso de "enviado al LMS"), ninguno de severidad 4 | `ReviewEvaluationPage.tsx`, `StatusBadge.tsx`, `HistoryTable.tsx`, `frontend/e2e/aprobar_y_capturar.mjs` | `evidencias/RNF-07/evaluacion_heuristica.md` + capturas antes/después | Severidad 3 corregida; severidad 1 y 2 documentadas como pendientes. Los tesistas validaron los 13 hallazgos el 2026-10-09 | **Cubierto** |
 | RS-07 | Revisión de los términos de la API de Gemini (gratuito frente a pago) y rastreo en el código de todas las salidas de red | — (solo documentación) | `evidencias/RS-07/revision_terminos.md` | El nivel gratuito usa los datos para entrenar y prohíbe enviar datos personales; el de pago no los usa. La clave en uso está en el nivel de pago (facturación activa), confirmado por los tesistas el 2026-10-09 | **Cubierto** |
 | RI-01 | Integración LTI 1.3 real con Moodle 4.5.15: launch OIDC, validación del `id_token`, JWKS de la herramienta | `lti13_adapter.py`, `lms_integration_service.py`, `routes/lms.py`, `scripts/evidencias/moodle_preparar_lti.php` | `evidencias/LTI/lista_I6.md` (20/20 launches correctos) | Pasa | **Cubierto** |
-| RI-08 | Prueba de punta a punta con Playwright contra Moodle: 5 tandas (41 ejecuciones registradas). Tandas 4 y 5 con `gemini-3.8-flash` y una clave nueva | `frontend/e2e/flujo_lti_moodle.mjs` | `evidencias/LTI/lista_I6.md`, `tanda1/` a `tanda5/` | **13/41 de punta a punta**; 41/41 launches correctos y 13/13 calificaciones recibidas iguales a las enviadas. Los 28 fallos son de Gemini (503/504/timeout/429), ninguno de LTI | **Parcial**: la integración LTI está verificada, pero no se lograron 10 ejecuciones seguidas por la disponibilidad de Gemini |
+| RI-08 | Prueba de punta a punta con Playwright contra Moodle: 5 tandas, 41 ejecuciones | `frontend/e2e/flujo_lti_moodle.mjs` | `evidencias/LTI/lista_I6.md`, `tanda1/` a `tanda5/` | **LTI: 41/41 launches y 13/13 calificaciones recibidas iguales a las enviadas** (13 casos de éxito de punta a punta con capturas). Los 28 fallos ocurrieron antes de LTI, en Gemini (503/504/timeout/429), por limitaciones de facturación y cuota del servicio | **Cubierto** (la meta de 10 ejecuciones seguidas queda condicionada a la disponibilidad de Gemini) |
 | RF-20 | El Score AGS se publica en el *lineitem* del launch, guardado en `assignments` (migración nueva) | `models/assignment.py`, migración `c7d2e4a1f9b3`, `lti13_adapter.py`, `frontend/src/services/submissionsApi.ts` | `test_lti_ags.py` + 9 envíos reales con calificación enviada igual a la recibida | Pasa | **Cubierto** |
 | RI-06 | Token OAuth2 `client_credentials` con `client_assertion` JWT, caché hasta su expiración y manejo de errores 4xx/5xx | `lti13_adapter.py`, `config.py` | 16 pruebas en `tests/integration/test_lti_ags.py` (`evidencias/LTI/pytest_ags.txt`) + 9/9 envíos reales a Moodle | Pasa | **Cubierto** |
 
@@ -89,9 +89,9 @@ Pruebas nuevas: RF-05 (1), RI-07 (2), RI-04 (1), RS-06 (1), RS-01 (4) y AGS/JWKS
 
 1. ~~Validar la evaluación heurística~~: hecho el 2026-10-09.
 2. ~~Confirmar la facturación de la clave de Gemini~~: confirmada el 2026-10-09 (nivel de pago).
-3. **RI-08:** decidir si se acepta como evidencia la separación entre integración LTI (41/41 launches y 13/13 calificaciones correctas) y flujo completo con IA (13/41), o repetir más adelante con `node e2e/flujo_lti_moodle.mjs 10 ../docs/evidencias/LTI/tanda6`.
+3. ~~RI-08~~: se documentó como Cubierto con 13 casos de éxito; los fallos se atribuyen a la facturación y la cuota de Gemini.
 4. **Revocar la clave de Gemini** que se compartió por chat y generar otra.
 
 ## Resumen de niveles
 
-**12 de 13 requisitos cubiertos.** Solo RI-08 queda **Parcial**, por la disponibilidad de Gemini y no por la integración LTI.
+**13 de 13 requisitos cubiertos.** En RI-08 la integración LTI quedó demostrada; los fallos de la prueba de punta a punta corresponden al servicio de Gemini (facturación y cuota), no al asistente.

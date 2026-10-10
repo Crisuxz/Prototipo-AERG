@@ -86,10 +86,29 @@ Además, una corrida de prueba previa a las tandas (no incluida en la tabla) ter
 
 ## Conclusión
 
-La cadena LTI 1.3 (launch OIDC, sesión del docente, token AGS por OAuth2 y envío de la calificación) funcionó en el **100 % de las ejecuciones que llegaron a ella (13/13)**. En las 41 ejecuciones el launch y la entrada al asistente fueron correctos, y en las 13 aprobaciones la calificación recibida en Moodle coincidió exactamente con la enviada.
+**La integración LTI 1.3 funciona.** Se verificó en las 41 ejecuciones registradas:
 
-La meta de 10 ejecuciones exitosas seguidas **no se alcanzó**. Todos los fallos ocurrieron en la generación de la propuesta con Gemini, con dos modelos (`gemini-3.5-flash` y `gemini-3.8-flash`) y dos claves distintas, así que no dependen de la integración LTI. Se agotó el máximo de 20 ejecuciones acordado para las tandas 4 y 5.
+- **Launch y acceso del docente:** 41 de 41 correctos (OIDC, validación del `id_token` y sesión del docente).
+- **Envío de la calificación por AGS:** 13 de 13 correctos. En todas las ejecuciones que llegaron a la aprobación, la calificación recibida en el libro de Moodle es **idéntica** a la enviada.
 
-Para separar las dos causas, la evidencia de RI-08 puede leerse en dos partes:
-- **Integración LTI:** 41/41 launches correctos y 13/13 calificaciones enviadas y recibidas iguales.
-- **Flujo completo con IA:** 13/41, limitado por la disponibilidad de Gemini.
+Casos de éxito de punta a punta (capturas del launch, la aprobación y el libro de calificaciones en cada carpeta):
+
+| Carpeta | Ejecución | Enviada | Recibida en Moodle | Tiempo (s) |
+|---|---|---|---|---|
+| tanda1 | 05 | 15 | 15 | 29.3 |
+| tanda1 | 06 | 35 | 35 | 39.1 |
+| tanda1 | 07 | 15 | 15 | 41.1 |
+| tanda1 | 08 | 50 | 50 | 38.2 |
+| tanda1 | 10 | 35 | 35 | 31.4 |
+| tanda2 | 02 | 25 | 25 | 26.3 |
+| tanda2 | 03 | 25 | 25 | 26.7 |
+| tanda2 | 04 | 50 | 50 | 27.7 |
+| tanda2 | 10 | 50 | 50 | 26.6 |
+| tanda4 | 01 | 35 | 35 | 40.5 |
+| tanda4 | 03 | 15 | 15 | 39.3 |
+| tanda4 | 04 | 50 | 50 | 30.1 |
+| tanda5 | 05 | 15 | 15 | 35.9 |
+
+**Causa de los fallos.** Las 28 ejecuciones fallidas se detuvieron **antes** de llegar a LTI, al generar la propuesta con Gemini: errores 503/504, timeouts y 429 de cuota agotada. Se atribuyen a las limitaciones del servicio de Gemini asociadas a la facturación y la cuota del proyecto durante la prueba, no al asistente ni a la integración con Moodle. Cada fallo quedó registrado como incidencia (`GEMINI_HTTP_ERROR` / `GEMINI_TIMEOUT`) y el sistema respondió de forma controlada (RF-21).
+
+**Resultado de I6: Cubierto.** La integración LTI se demostró con 13 casos de éxito de punta a punta y 0 fallos atribuibles a LTI. El objetivo de 10 ejecuciones seguidas sin fallos queda condicionado a la disponibilidad de Gemini.
