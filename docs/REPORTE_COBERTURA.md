@@ -17,7 +17,7 @@ Fecha: 2026-10-09. Toda la evidencia está en `docs/evidencias/` y viene de ejec
 | RNF-07 | Evaluación heurística (Nielsen, 1994): 13 hallazgos, 2 de severidad 3 corregidos (desbordamiento y aviso falso de "enviado al LMS"), ninguno de severidad 4 | `ReviewEvaluationPage.tsx`, `StatusBadge.tsx`, `HistoryTable.tsx`, `frontend/e2e/aprobar_y_capturar.mjs` | `evidencias/RNF-07/evaluacion_heuristica.md` + capturas antes/después | Severidad 3 corregida; severidad 1 y 2 documentadas como pendientes. Los tesistas validaron los 13 hallazgos el 2026-10-09 | **Cubierto** |
 | RS-07 | Revisión de los términos de la API de Gemini (gratuito frente a pago) y rastreo en el código de todas las salidas de red | — (solo documentación) | `evidencias/RS-07/revision_terminos.md` | El nivel gratuito usa los datos para entrenar y prohíbe enviar datos personales; el de pago no los usa. La clave en uso está en el nivel de pago (facturación activa), confirmado por los tesistas el 2026-10-09 | **Cubierto** |
 | RI-01 | Integración LTI 1.3 real con Moodle 4.5.15: launch OIDC, validación del `id_token`, JWKS de la herramienta | `lti13_adapter.py`, `lms_integration_service.py`, `routes/lms.py`, `scripts/evidencias/moodle_preparar_lti.php` | `evidencias/LTI/lista_I6.md` (20/20 launches correctos) | Pasa | **Cubierto** |
-| RI-08 | Prueba de punta a punta con Playwright contra Moodle: 2 tandas de 10 y una tercera detenida tras 4 | `frontend/e2e/flujo_lti_moodle.mjs` | `evidencias/LTI/lista_I6.md`, `tanda1/`, `tanda2/`, `tanda3/` | **9/24 de punta a punta**; los 15 fallos son de Gemini (503/504/timeout y, en la tanda 3, 429 por cuota agotada) y ninguno de LTI: 9/9 envíos LTI correctos | **Parcial**: falta una tanda de 10/10 cuando se restablezca la cuota de Gemini |
+| RI-08 | Prueba de punta a punta con Playwright contra Moodle: 5 tandas (41 ejecuciones registradas). Tandas 4 y 5 con `gemini-3.8-flash` y una clave nueva | `frontend/e2e/flujo_lti_moodle.mjs` | `evidencias/LTI/lista_I6.md`, `tanda1/` a `tanda5/` | **13/41 de punta a punta**; 41/41 launches correctos y 13/13 calificaciones recibidas iguales a las enviadas. Los 28 fallos son de Gemini (503/504/timeout/429), ninguno de LTI | **Parcial**: la integración LTI está verificada, pero no se lograron 10 ejecuciones seguidas por la disponibilidad de Gemini |
 | RF-20 | El Score AGS se publica en el *lineitem* del launch, guardado en `assignments` (migración nueva) | `models/assignment.py`, migración `c7d2e4a1f9b3`, `lti13_adapter.py`, `frontend/src/services/submissionsApi.ts` | `test_lti_ags.py` + 9 envíos reales con calificación enviada igual a la recibida | Pasa | **Cubierto** |
 | RI-06 | Token OAuth2 `client_credentials` con `client_assertion` JWT, caché hasta su expiración y manejo de errores 4xx/5xx | `lti13_adapter.py`, `config.py` | 16 pruebas en `tests/integration/test_lti_ags.py` (`evidencias/LTI/pytest_ags.txt`) + 9/9 envíos reales a Moodle | Pasa | **Cubierto** |
 
@@ -39,6 +39,7 @@ Pruebas nuevas: RF-05 (1), RI-07 (2), RI-04 (1), RS-06 (1), RS-01 (4) y AGS/JWKS
 
 | Componente | Versión |
 |---|---|
+| Gemini | `gemini-3.5-flash` (tandas 1-3) y `gemini-3.8-flash` (tandas 4-5) |
 | Moodle | 4.5.15 (Build: 20261005), rama `MOODLE_405_STABLE`, con moodlehq/moodle-docker y PostgreSQL, en el puerto 8081 |
 | Caddy | v2.11.7 (imagen `caddy:2`) |
 | Playwright | 1.64.0 (Chromium headless shell 156.0.8078.4) |
@@ -81,14 +82,15 @@ Pruebas nuevas: RF-05 (1), RI-07 (2), RI-04 (1), RS-06 (1), RS-01 (4) y AGS/JWKS
 | Desde el host, el firewall bloquea `host.docker.internal` (IP de la LAN) | El navegador de Playwright resuelve ese nombre a `127.0.0.1` (`--host-resolver-rules`); las URLs registradas en Moodle no cambian |
 | Moodle bloquea por defecto las peticiones a IPs privadas | `curlsecurityblockedhosts` vacío, **solo en el Moodle local** |
 | La prueba del JWKS heredaba la llave configurada en `backend/.env` | `Settings(_env_file=None)` en `conftest.py` |
-| Gemini respondió 503/504 de forma intermitente en las tandas 1 y 2 (11 de 20) y **429** (cuota/límite de tasa agotado) en las 4 ejecuciones de la tanda 3 | No tiene solución desde el código; quedó registrado como incidencia. La tanda 3 se detuvo tras 4 fallos seguidos por 429 (ver RI-08) |
+| Gemini falló de forma intermitente durante la prueba de punta a punta: 503/504 en las tandas 1 y 2, 429 en la tanda 3, y 503/504/timeout en las tandas 4 y 5 aun con `gemini-3.8-flash` y una clave nueva | No tiene solución desde el código; quedó registrado como incidencia. `gemini-2.5-flash` ya no está disponible para usuarios nuevos (404). Se agotó el máximo de 20 ejecuciones acordado |
 | Al editar `lti13_adapter.py` se borró por accidente la clase `LaunchRequest` | Las pruebas lo detectaron y se restauró antes del commit |
 
 ## Pendientes para los tesistas
 
 1. ~~Validar la evaluación heurística~~: hecho el 2026-10-09.
 2. ~~Confirmar la facturación de la clave de Gemini~~: confirmada el 2026-10-09 (nivel de pago).
-3. **Cerrar RI-08 con 10/10.** Revisar en Google Cloud (APIs y servicios → Cuotas) la cuota y el límite de tasa del modelo configurado en `GEMINI_MODEL`, ya que la tanda 3 recibió 429 aunque la facturación está activa. Cuando se restablezca, ejecutar desde `frontend/` (con backend, Vite y Moodle en marcha) `node e2e/flujo_lti_moodle.mjs 10 ../docs/evidencias/LTI/tanda4`.
+3. **RI-08:** decidir si se acepta como evidencia la separación entre integración LTI (41/41 launches y 13/13 calificaciones correctas) y flujo completo con IA (13/41), o repetir más adelante con `node e2e/flujo_lti_moodle.mjs 10 ../docs/evidencias/LTI/tanda6`.
+4. **Revocar la clave de Gemini** que se compartió por chat y generar otra.
 
 ## Resumen de niveles
 

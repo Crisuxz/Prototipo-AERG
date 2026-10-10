@@ -23,7 +23,9 @@
 4. El backend obtiene un `access_token` (client_credentials con `client_assertion` firmada con la llave de la herramienta) y publica el *Score* en `<lineitem>/scores`.
 5. Se compara la calificación enviada (`final_total_score` de la respuesta de aprobación) con la recibida (`m_grade_grades.finalgrade` del alumno en la actividad), y se captura el libro de calificaciones.
 
-## Resultados (24 ejecuciones: 2 tandas de 10 y una tercera tanda detenida tras 4)
+## Resultados (41 ejecuciones registradas en 5 tandas)
+
+Tandas 1 a 3 con `gemini-3.5-flash`. Tandas 4 y 5 con `gemini-3.8-flash` y una clave nueva: `gemini-2.5-flash` ya no está disponible para usuarios nuevos (404), y se cambió de clave por el 429 de la tanda 3. Una tanda previa con `gemini-3.8-flash` y la clave anterior se detuvo tras 3 éxitos (35, 25 y 15) al cambiar la clave, y no se incluye.
 
 | Ejecución | Resultado | Calificación enviada | Calificación recibida en Moodle | Tiempo (s) | Causa del fallo | Capturas |
 |---|---|---|---|---|---|---|
@@ -51,24 +53,43 @@
 | 3-02 | Fallo | — | — | 126 | Gemini respondió 429 (cuota/limite de tasa agotado); no se llegó al envío LTI | [error](tanda3/ejecucion_02_error.png) |
 | 3-03 | Fallo | — | — | 125.9 | Gemini respondió 429 (cuota/limite de tasa agotado); no se llegó al envío LTI | [error](tanda3/ejecucion_03_error.png) |
 | 3-04 | Fallo | — | — | 125.9 | Gemini respondió 429 (cuota/limite de tasa agotado); no se llegó al envío LTI | [error](tanda3/ejecucion_04_error.png) |
+| 4-01 | Éxito | 35 | 35 | 40.5 | — | [launch](tanda4/ejecucion_01_1_asistente_tras_launch.png) · [aprobada](tanda4/ejecucion_01_2_aprobada.png) · [libro](tanda4/ejecucion_01_3_libro_calificaciones.png) |
+| 4-02 | Fallo | — | — | 126.3 | Gemini no generó la propuesta (503/504/timeout); no se llegó al envío LTI | [error](tanda4/ejecucion_02_error.png) |
+| 4-03 | Éxito | 15 | 15 | 39.3 | — | [launch](tanda4/ejecucion_03_1_asistente_tras_launch.png) · [aprobada](tanda4/ejecucion_03_2_aprobada.png) · [libro](tanda4/ejecucion_03_3_libro_calificaciones.png) |
+| 4-04 | Éxito | 50 | 50 | 30.1 | — | [launch](tanda4/ejecucion_04_1_asistente_tras_launch.png) · [aprobada](tanda4/ejecucion_04_2_aprobada.png) · [libro](tanda4/ejecucion_04_3_libro_calificaciones.png) |
+| 4-05 | Fallo | — | — | 126.2 | Gemini no generó la propuesta (503/504/timeout); no se llegó al envío LTI | [error](tanda4/ejecucion_05_error.png) |
+| 4-06 | Fallo | — | — | 127.2 | Gemini no generó la propuesta (503/504/timeout); no se llegó al envío LTI | [error](tanda4/ejecucion_06_error.png) |
+| 4-07 | Fallo | — | — | 127.2 | Gemini no generó la propuesta (503/504/timeout); no se llegó al envío LTI | [error](tanda4/ejecucion_07_error.png) |
+| 4-08 | Fallo | — | — | 127.3 | Gemini no generó la propuesta (503/504/timeout); no se llegó al envío LTI | [error](tanda4/ejecucion_08_error.png) |
+| 4-09 | Fallo | — | — | 127 | Gemini no generó la propuesta (503/504/timeout); no se llegó al envío LTI | [error](tanda4/ejecucion_09_error.png) |
+| 4-10 | Fallo | — | — | 126.4 | Gemini no generó la propuesta (503/504/timeout); no se llegó al envío LTI | [error](tanda4/ejecucion_10_error.png) |
+| 5-01 | Fallo | — | — | 127.4 | Gemini no generó la propuesta (503/504/timeout); no se llegó al envío LTI | [error](tanda5/ejecucion_01_error.png) |
+| 5-02 | Fallo | — | — | 126.8 | Gemini no generó la propuesta (503/504/timeout); no se llegó al envío LTI | [error](tanda5/ejecucion_02_error.png) |
+| 5-03 | Fallo | — | — | 126.3 | Gemini no generó la propuesta (503/504/timeout); no se llegó al envío LTI | [error](tanda5/ejecucion_03_error.png) |
+| 5-04 | Fallo | — | — | 126.4 | Gemini no generó la propuesta (503/504/timeout); no se llegó al envío LTI | [error](tanda5/ejecucion_04_error.png) |
+| 5-05 | Éxito | 15 | 15 | 35.9 | — | [launch](tanda5/ejecucion_05_1_asistente_tras_launch.png) · [aprobada](tanda5/ejecucion_05_2_aprobada.png) · [libro](tanda5/ejecucion_05_3_libro_calificaciones.png) |
+| 5-06 | Fallo | — | — | 126.5 | Gemini no generó la propuesta (503/504/timeout); no se llegó al envío LTI | [error](tanda5/ejecucion_06_error.png) |
+| 5-07 | Fallo | — | — | 127.3 | Gemini no generó la propuesta (503/504/timeout); no se llegó al envío LTI | [error](tanda5/ejecucion_07_error.png) |
 
 ## Resumen
 
 | Indicador | Valor |
 |---|---|
-| Ejecuciones totales | 24 (tanda 3 detenida tras 4 ejecuciones) |
-| Éxitos de punta a punta | 9 de 24 |
-| Fallos | 15, **todos** en la generación con Gemini: tandas 1 y 2, 10 `GEMINI_HTTP_ERROR` por 503/504 y 1 `GEMINI_TIMEOUT`; tanda 3, 4 `GEMINI_HTTP_ERROR` por **429** (cuota agotada). Todos quedaron como incidencias en `incident_logs` |
+| Ejecuciones totales | 41 (10 + 10 + 4 + 10 + 7) |
+| Éxitos de punta a punta | 13 de 41 (tandas 4-5: 4 de 17) |
+| Fallos | 28, **todos** en la generación con Gemini (503, 504, timeout y, en la tanda 3, 429). Todos quedaron como incidencias en `incident_logs` |
 | Fallos atribuibles a LTI (launch, sesión, token AGS, envío de score) | **0** |
-| Ejecuciones que llegaron a la aprobación | 9; en las 9 la calificación recibida en Moodle **coincide exactamente** con la enviada |
+| Ejecuciones que llegaron a la aprobación | 13; en las 13 la calificación recibida en Moodle **coincide exactamente** con la enviada |
 | Tiempo medio de una ejecución exitosa | 31.8 s (incluye la generación con Gemini) |
 
 Además, una corrida de prueba previa a las tandas (no incluida en la tabla) terminó con éxito: enviada 35, recibida 35.
 
 ## Conclusión
 
-La cadena LTI 1.3 (launch OIDC, sesión del docente, token AGS por OAuth2 y envío de la calificación) funcionó en el **100 % de las ejecuciones que llegaron a ella (9/9)**. En las 24 ejecuciones el launch y la entrada al asistente fueron correctos, y en las 9 aprobaciones la calificación recibida en Moodle coincidió exactamente con la enviada.
+La cadena LTI 1.3 (launch OIDC, sesión del docente, token AGS por OAuth2 y envío de la calificación) funcionó en el **100 % de las ejecuciones que llegaron a ella (13/13)**. En las 41 ejecuciones el launch y la entrada al asistente fueron correctos, y en las 13 aprobaciones la calificación recibida en Moodle coincidió exactamente con la enviada.
 
-La meta de 10 ejecuciones exitosas de punta a punta **no se alcanzó** por la API de Gemini, ajena a la integración: errores 503/504 intermitentes en las tandas 1 y 2, y en la tanda 3 un **429** constante, que indica que se agotó la cuota o el límite de tasa del proyecto. La tanda 3 se detuvo tras 4 fallos seguidos, porque las demás ejecuciones fallarían igual hasta que se restablezca la cuota.
+La meta de 10 ejecuciones exitosas seguidas **no se alcanzó**. Todos los fallos ocurrieron en la generación de la propuesta con Gemini, con dos modelos (`gemini-3.5-flash` y `gemini-3.8-flash`) y dos claves distintas, así que no dependen de la integración LTI. Se agotó el máximo de 20 ejecuciones acordado para las tandas 4 y 5.
 
-**Pendiente para cerrar I6 con 10/10:** revisar en Google Cloud la cuota y los límites de tasa del modelo, o esperar a que se restablezcan, y ejecutar desde `frontend/` `node e2e/flujo_lti_moodle.mjs 10 ../docs/evidencias/LTI/tanda4`.
+Para separar las dos causas, la evidencia de RI-08 puede leerse en dos partes:
+- **Integración LTI:** 41/41 launches correctos y 13/13 calificaciones enviadas y recibidas iguales.
+- **Flujo completo con IA:** 13/41, limitado por la disponibilidad de Gemini.
