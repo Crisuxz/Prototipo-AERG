@@ -22,7 +22,9 @@ export function useSubmission() {
     } catch (apiError) {
       setError(apiError as ApiError)
       setStatus('error')
-      return null
+      // Se relanza: el estado `error` solo es visible en el siguiente render, y quien llama
+      // necesita el error ahora para notificarlo.
+      throw apiError
     }
   }
 

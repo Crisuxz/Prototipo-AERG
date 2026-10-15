@@ -20,35 +20,44 @@ export function CriterionReviewCard({
 }: CriterionReviewCardProps) {
   return (
     <tr className="border-t border-gray-100 align-top">
-      <td className="px-4 py-4">
+      <th scope="row" className="px-4 py-4 text-left font-normal">
         <p className="font-medium text-gray-900">{result.criterion_name}</p>
-        <p className="mt-0.5 text-xs text-gray-400">Peso {result.weight}%</p>
+        <p className="mt-0.5 text-xs text-gray-600">Peso {result.weight}%</p>
         {result.modified_by_teacher && (
-          <p className="mt-1 text-xs font-medium text-amber-600">
-            Modificado (IA sugirio {result.ai_suggested_score})
+          <p className="mt-1 text-xs font-medium text-amber-700">
+            Modificado (IA sugirió {result.ai_suggested_score})
           </p>
         )}
-      </td>
+      </th>
       <td className="px-4 py-4">
         <span className="inline-block rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700">
           {levelName ?? 'Sin nivel'}
         </span>
       </td>
       <td className="px-4 py-4">
-        <ScoreEditor value={result.final_score} max={maxScore} disabled={readOnly} onChange={onScoreChange} />
-        <p className="mt-1 text-xs text-gray-400">Ponderado {result.weighted_score}</p>
+        <ScoreEditor
+          value={result.final_score}
+          max={maxScore}
+          label={`Puntos de ${result.criterion_name}`}
+          disabled={readOnly}
+          onChange={onScoreChange}
+        />
+        <p className="mt-1 text-xs text-gray-600">Ponderado {result.weighted_score}</p>
       </td>
       <td className="min-w-64 px-4 py-4">
         <textarea
           value={result.final_feedback}
           disabled={readOnly}
           rows={3}
+          aria-label={`Retroalimentación de ${result.criterion_name}`}
           onChange={(event) => onFeedbackChange(event.target.value)}
-          className="w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm focus:border-indigo-400 focus:outline-none"
+          className="w-full rounded-lg border border-gray-300 px-2.5 py-1.5 text-sm focus:border-indigo-500"
         />
         {result.evidence.length > 0 && (
-          <details className="mt-2 text-xs text-gray-500">
-            <summary className="cursor-pointer">Evidencia citada por la IA</summary>
+          <details className="mt-2 text-xs text-gray-600">
+            <summary className="cursor-pointer font-medium text-indigo-700">
+              Evidencia citada por la IA ({result.evidence.length})
+            </summary>
             <ul className="mt-1 list-disc pl-4">
               {result.evidence.map((item, index) => (
                 <li key={index}>{item}</li>
@@ -57,8 +66,8 @@ export function CriterionReviewCard({
           </details>
         )}
         {result.improvement_suggestion && (
-          <p className="mt-2 text-xs text-gray-500">
-            <span className="font-medium text-gray-600">Sugerencia: </span>
+          <p className="mt-2 text-xs text-gray-600">
+            <span className="font-medium text-gray-700">Sugerencia: </span>
             {result.improvement_suggestion}
           </p>
         )}

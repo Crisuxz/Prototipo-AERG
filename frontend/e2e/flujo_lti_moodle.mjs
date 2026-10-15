@@ -79,7 +79,7 @@ for (let run = 1; run <= Number(runs); run++) {
       mimeType: 'text/plain',
       buffer: Buffer.from(essay),
     })
-    await page.fill('input[placeholder="Nombre o matricula"]', STUDENT_LTI_ID)
+    await page.fill('input[placeholder="Nombre o matrícula"]', STUDENT_LTI_ID)
     const rubricValue = await page
       .locator('select option', { hasText: new RegExp(`^${RUBRIC_NAME} \\(`) })
       .first()

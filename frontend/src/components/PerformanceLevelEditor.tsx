@@ -1,14 +1,26 @@
 import type { PerformanceLevelInput } from '../types'
+import { fieldId, type RubricErrors } from '../utils/rubricValidation'
+import { FormField } from './FormField'
 import { PlusIcon, TrashIcon } from './icons'
 
 interface PerformanceLevelEditorProps {
   levels: PerformanceLevelInput[]
+  /** Indice del criterio (0, 1, ...) para construir los ids de los campos. */
+  criterionIndex: number
+  /** Ej. "criterio 2": contexto para los nombres accesibles de los botones. */
+  criterionLabel: string
+  errors: RubricErrors
   onChange: (levels: PerformanceLevelInput[]) => void
   disabled?: boolean
 }
 
+const NAME_EXAMPLES = ['Insuficiente', 'Suficiente', 'Bueno', 'Excelente']
+
 export function PerformanceLevelEditor({
   levels,
+  criterionIndex,
+  criterionLabel,
+  errors,
   onChange,
   disabled,
 }: PerformanceLevelEditorProps) {
@@ -25,61 +37,86 @@ export function PerformanceLevelEditor({
   }
 
   const add = () => {
-    onChange([...levels, { name: '', description: null, score: 0, order: levels.length + 1 }])
+    onChange([...levels, { name: '', description: null, score: NaN, order: levels.length + 1 }])
   }
 
   return (
-    <div className="flex flex-wrap gap-2">
-      {levels.map((level, index) => (
-        <div
-          key={index}
-          className="flex min-w-40 items-start gap-1 rounded-lg border border-gray-200 bg-gray-50 p-2"
-        >
-          <div className="min-w-0 flex-1">
-            <input
-              value={level.name}
-              disabled={disabled}
-              placeholder="Nivel"
-              onChange={(event) => update(index, { name: event.target.value })}
-              className="w-full rounded border border-transparent bg-transparent px-1 py-0.5 text-xs font-medium text-gray-900 focus:border-indigo-300 focus:outline-none"
-            />
-            <input
-              value={level.description ?? ''}
-              disabled={disabled}
-              placeholder="Descripcion"
-              onChange={(event) => update(index, { description: event.target.value || null })}
-              className="w-full rounded border border-transparent bg-transparent px-1 py-0.5 text-xs text-gray-500 focus:border-indigo-300 focus:outline-none"
-            />
-            <input
-              type="number"
-              min={0}
-              step="0.5"
-              value={level.score}
-              disabled={disabled}
-              onChange={(event) => update(index, { score: Number(event.target.value) })}
-              className="w-14 rounded border border-transparent bg-transparent px-1 py-0.5 text-xs text-gray-700 focus:border-indigo-300 focus:outline-none"
-            />
-          </div>
+    <fieldset>
+      <legend className="text-sm font-medium text-gray-700">Niveles de desempeño</legend>
+      <p className="text-xs text-gray-600">
+        Cada nivel describe un grado de logro y los puntos que otorga. El nivel con más puntos define el máximo
+        del criterio.
+      </p>
+      <ul className="mt-2 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+        {levels.map((level, index) => (
+          <li key={index} className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-600">Nivel {index + 1}</p>
+              <button
+                type="button"
+                disabled={disabled || levels.length === 1}
+                onClick={() => remove(index)}
+                aria-label={`Quitar nivel ${index + 1} del ${criterionLabel}`}
+                title={levels.length === 1 ? 'Cada criterio necesita al menos un nivel' : 'Quitar nivel'}
+                className="flex h-7 w-7 items-center justify-center rounded text-gray-500 hover:bg-red-50 hover:text-red-600 disabled:opacity-40"
+              >
+                <TrashIcon className="h-3.5 w-3.5" />
+              </button>
+            </div>
+            <div className="space-y-2">
+              <FormField
+                id={fieldId.levelName(criterionIndex, index)}
+                label="Nombre"
+                size="sm"
+                required
+                maxLength={255}
+                value={level.name}
+                disabled={disabled}
+                placeholder={`Ej. ${NAME_EXAMPLES[index] ?? 'Sobresaliente'}`}
+                error={errors[fieldId.levelName(criterionIndex, index)]}
+                onChange={(event) => update(index, { name: event.target.value })}
+              />
+              <FormField
+                id={`criterion-${criterionIndex}-level-${index}-description`}
+                label="Descripción (opcional)"
+                size="sm"
+                multiline
+                rows={2}
+                value={level.description ?? ''}
+                disabled={disabled}
+                placeholder="Ej. Presenta una tesis clara sustentada con evidencia"
+                onChange={(event) => update(index, { description: event.target.value || null })}
+              />
+              <FormField
+                id={fieldId.levelScore(criterionIndex, index)}
+                label="Puntos"
+                size="sm"
+                required
+                inputMode="decimal"
+                min={0}
+                step="0.5"
+                numberValue={level.score}
+                disabled={disabled}
+                placeholder="Ej. 4"
+                error={errors[fieldId.levelScore(criterionIndex, index)]}
+                onNumberChange={(score) => update(index, { score })}
+              />
+            </div>
+          </li>
+        ))}
+        <li>
           <button
             type="button"
-            disabled={disabled || levels.length === 1}
-            onClick={() => remove(index)}
-            aria-label="Quitar nivel"
-            className="rounded p-0.5 text-gray-400 hover:text-red-600 disabled:opacity-40"
+            disabled={disabled}
+            onClick={add}
+            aria-label={`Agregar nivel al ${criterionLabel}`}
+            className="flex h-full min-h-24 w-full items-center justify-center gap-1 rounded-lg border-2 border-dashed border-gray-300 px-2 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-50 disabled:opacity-40"
           >
-            <TrashIcon className="h-3.5 w-3.5" />
+            <PlusIcon className="h-4 w-4" />
+            Agregar nivel
           </button>
-        </div>
-      ))}
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={add}
-        className="flex items-center gap-1 self-start rounded-lg border border-dashed border-gray-300 px-2 py-2 text-xs font-medium text-indigo-600 hover:bg-indigo-50 disabled:opacity-40"
-      >
-        <PlusIcon className="h-3.5 w-3.5" />
-        Nivel
-      </button>
-    </div>
+        </li>
+      </ul>
+    </fieldset>
   )
 }

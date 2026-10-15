@@ -8,11 +8,11 @@ export function scoreLevelLabel(score: number, max: number): string {
 }
 
 const COLORS: Record<string, string> = {
-  Excelente: 'text-emerald-600 bg-emerald-50',
+  Excelente: 'text-emerald-700 bg-emerald-50',
   'Muy bueno': 'text-indigo-600 bg-indigo-50',
-  Bueno: 'text-amber-600 bg-amber-50',
-  Satisfactorio: 'text-amber-600 bg-amber-50',
-  Insuficiente: 'text-red-600 bg-red-50',
+  Bueno: 'text-amber-800 bg-amber-50',
+  Satisfactorio: 'text-amber-800 bg-amber-50',
+  Insuficiente: 'text-red-700 bg-red-50',
 }
 
 export function ScoreLevelPill({ score, max }: { score: number; max: number }) {

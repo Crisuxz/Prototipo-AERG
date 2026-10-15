@@ -21,19 +21,19 @@ function pageList(page: number, totalPages: number): (number | 'ellipsis')[] {
 export function Pagination({ page, totalPages, onChange }: PaginationProps) {
   if (totalPages <= 1) return null
   return (
-    <div className="flex items-center justify-end gap-1.5 py-4">
+    <nav aria-label="Paginación" className="flex items-center justify-end gap-1.5 py-4">
       <button
         type="button"
         disabled={page === 1}
         onClick={() => onChange(page - 1)}
-        aria-label="Pagina anterior"
+        aria-label="Página anterior"
         className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-40"
       >
         <ChevronLeftIcon className="h-4 w-4" />
       </button>
       {pageList(page, totalPages).map((item, index) =>
         item === 'ellipsis' ? (
-          <span key={`ellipsis-${index}`} className="px-1 text-sm text-gray-400">
+          <span key={`ellipsis-${index}`} aria-hidden="true" className="px-1 text-sm text-gray-500">
             ...
           </span>
         ) : (
@@ -41,6 +41,8 @@ export function Pagination({ page, totalPages, onChange }: PaginationProps) {
             key={item}
             type="button"
             onClick={() => onChange(item)}
+            aria-label={`Página ${item}`}
+            aria-current={item === page ? 'page' : undefined}
             className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm font-medium ${
               item === page ? 'bg-indigo-600 text-white' : 'text-gray-600 hover:bg-gray-100'
             }`}
@@ -53,11 +55,11 @@ export function Pagination({ page, totalPages, onChange }: PaginationProps) {
         type="button"
         disabled={page === totalPages}
         onClick={() => onChange(page + 1)}
-        aria-label="Pagina siguiente"
+        aria-label="Página siguiente"
         className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-40"
       >
         <ChevronRightIcon className="h-4 w-4" />
       </button>
-    </div>
+    </nav>
   )
 }

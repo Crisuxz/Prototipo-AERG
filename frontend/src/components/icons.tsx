@@ -9,6 +9,8 @@ const base = (props: IconProps) => ({
   strokeWidth: 1.75,
   strokeLinecap: 'round' as const,
   strokeLinejoin: 'round' as const,
+  'aria-hidden': true,
+  focusable: false,
   ...props,
 })
 
