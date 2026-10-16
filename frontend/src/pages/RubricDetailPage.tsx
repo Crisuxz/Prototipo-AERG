@@ -15,13 +15,21 @@ import { rubricsApi } from '../services/rubricsApi'
 import type { Rubric, RubricCriterionInput, RubricInput, RubricStatus } from '../types'
 import { fieldId, validateRubric } from '../utils/rubricValidation'
 
+/** Niveles estandar con que inicia cada criterio; el docente puede agregar o quitar niveles. */
+const DEFAULT_LEVELS = [
+  { name: 'Excelente', score: 100 },
+  { name: 'Bueno', score: NaN },
+  { name: 'Regular', score: NaN },
+  { name: 'Malo', score: 0 },
+]
+
 const emptyCriterion = (order: number): RubricCriterionInput => ({
   name: '',
   description: null,
   // Vacios (NaN) en lugar de 0: el campo muestra el ejemplo y no hay un 0 que borrar.
   weight: NaN,
   order,
-  levels: [{ name: '', description: null, score: NaN, order: 1 }],
+  levels: DEFAULT_LEVELS.map((level, index) => ({ ...level, description: null, order: index + 1 })),
 })
 
 const emptyRubric: RubricInput = {

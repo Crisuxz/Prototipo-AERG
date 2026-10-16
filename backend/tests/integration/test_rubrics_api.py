@@ -64,6 +64,13 @@ def test_rubrica_inexistente_devuelve_404(client):
     assert response.json()["error"]["code"] == "NOT_FOUND"
 
 
+def test_nivel_con_porcentaje_mayor_a_100_es_rechazado(client, rubric_payload):
+    rubric_payload["criteria"][0]["levels"][0]["score"] = 120
+    response = client.post("/api/rubrics", json=rubric_payload)
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "VALIDATION_ERROR"
+
+
 def test_criterio_sin_niveles_es_rechazado_por_el_schema(client, rubric_payload):
     rubric_payload["criteria"][0]["levels"] = []
     response = client.post("/api/rubrics", json=rubric_payload)

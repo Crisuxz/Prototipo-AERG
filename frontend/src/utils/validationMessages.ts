@@ -9,7 +9,7 @@ const FIELD_NAMES: Record<string, string> = {
   description: 'la descripción',
   instructions: 'las instrucciones',
   weight: 'el peso',
-  score: 'los puntos',
+  score: 'el porcentaje',
   levels: 'los niveles',
   criteria: 'los criterios',
   student_identifier: 'el identificador del estudiante',

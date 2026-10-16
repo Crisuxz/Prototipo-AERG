@@ -14,7 +14,7 @@ interface PerformanceLevelEditorProps {
   disabled?: boolean
 }
 
-const NAME_EXAMPLES = ['Insuficiente', 'Suficiente', 'Bueno', 'Excelente']
+const SCORE_EXAMPLES = [100, 80, 60, 0]
 
 export function PerformanceLevelEditor({
   levels,
@@ -44,8 +44,9 @@ export function PerformanceLevelEditor({
     <fieldset>
       <legend className="text-sm font-medium text-gray-700">Niveles de desempeño</legend>
       <p className="text-xs text-gray-600">
-        Cada nivel describe un grado de logro y los puntos que otorga. El nivel con más puntos define el máximo
-        del criterio.
+        Cada criterio inicia con los niveles estándar Excelente, Bueno, Regular y Malo; puedes agregar o quitar
+        niveles. El porcentaje indica qué parte de la calificación del criterio obtiene un trabajo en ese nivel:
+        100 % es la calificación completa y 0 % no otorga calificación.
       </p>
       <ul className="mt-2 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
         {levels.map((level, index) => (
@@ -72,7 +73,7 @@ export function PerformanceLevelEditor({
                 maxLength={255}
                 value={level.name}
                 disabled={disabled}
-                placeholder={`Ej. ${NAME_EXAMPLES[index] ?? 'Sobresaliente'}`}
+                placeholder="Ej. Sobresaliente"
                 error={errors[fieldId.levelName(criterionIndex, index)]}
                 onChange={(event) => update(index, { name: event.target.value })}
               />
@@ -89,15 +90,16 @@ export function PerformanceLevelEditor({
               />
               <FormField
                 id={fieldId.levelScore(criterionIndex, index)}
-                label="Puntos"
+                label="Porcentaje (%)"
                 size="sm"
                 required
                 inputMode="decimal"
                 min={0}
-                step="0.5"
+                max={100}
+                step="1"
                 numberValue={level.score}
                 disabled={disabled}
-                placeholder="Ej. 4"
+                placeholder={`Ej. ${SCORE_EXAMPLES[index] ?? 50}`}
                 error={errors[fieldId.levelScore(criterionIndex, index)]}
                 onNumberChange={(score) => update(index, { score })}
               />

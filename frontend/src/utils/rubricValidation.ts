@@ -40,12 +40,22 @@ export function validateRubric(form: RubricInput, requireComplete: boolean): Rub
         errors[fieldId.levelName(c, l)] = `Escribe el nombre del nivel ${l + 1} del criterio ${criterionLabel}.`
       }
       if (Number.isNaN(level.score)) {
-        errors[fieldId.levelScore(c, l)] = `Escribe los puntos del nivel ${l + 1} del criterio ${criterionLabel}.`
-      } else if (!Number.isFinite(level.score) || level.score < 0) {
+        errors[fieldId.levelScore(c, l)] = `Escribe el porcentaje del nivel ${l + 1} del criterio ${criterionLabel}.`
+      } else if (!Number.isFinite(level.score) || level.score < 0 || level.score > 100) {
         errors[fieldId.levelScore(c, l)] =
-          `El puntaje del nivel ${l + 1} del criterio ${criterionLabel} no puede ser negativo.`
+          `El porcentaje del nivel ${l + 1} del criterio ${criterionLabel} debe estar entre 0 y 100.`
       }
     })
+    // El nivel mas alto define el maximo del criterio en el calculo; con 100 % el porcentaje de cada
+    // nivel equivale a la parte de la calificacion que otorga.
+    const scores = criterion.levels.map((level) => level.score)
+    if (scores.length > 0 && scores.every((score) => Number.isFinite(score) && score >= 0 && score <= 100)) {
+      const top = Math.max(...scores)
+      if (top !== 100) {
+        errors[fieldId.levelScore(c, scores.indexOf(top))] =
+          `El nivel más alto del criterio ${criterionLabel} debe valer 100 % (calificación completa).`
+      }
+    }
   })
 
   if (requireComplete && form.criteria.length > 0) {

@@ -9,7 +9,8 @@ from app.schemas.common import ApiModel
 class PerformanceLevelRequest(BaseModel):
     name: str = Field(min_length=1, max_length=255)
     description: str | None = None
-    score: float = Field(ge=0)
+    # Porcentaje de la calificacion del criterio que otorga el nivel (0 = nada, 100 = completa).
+    score: float = Field(ge=0, le=100)
     order: int = Field(ge=0)
 
 
